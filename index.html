@@ -81,6 +81,7 @@
   .btn:hover { background: var(--accent-deep); }
   .btn:active { transform: scale(.97); }
   .btn.block { width: 100%; }
+  .btn.ok { background: #7bb89a; box-shadow: 0 6px 18px rgba(123,184,154,.4); }
   .btn.ghost { background: var(--accent-soft); color: var(--accent-deep); box-shadow: none; }
   .btn.ghost:hover { background: #d8e3fa; }
   .btn.subtle { background: transparent; color: var(--ink-soft); box-shadow: none; padding: 10px 14px; }
@@ -115,6 +116,7 @@
 
   .grat-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
   .grat-row textarea { min-height: 52px; }
+  .grat-row textarea.listening { border-color: #e6b8b8; background: #fff7f7; }
 
   /* mood chips */
   .moods { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -126,6 +128,14 @@
   .mood:hover { border-color: var(--lav); }
   .mood.on { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--lav); font-weight: 600; }
   .mood .em { font-size: 15px; }
+
+  /* draft-restored banner */
+  .draft-note {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background: #fbf6ea; color: #9a7b3f; border:1px solid #f0e4c8;
+    padding: 10px 14px; border-radius: 14px; font-size: 13px; font-weight: 600; margin-bottom: 14px;
+  }
+  .draft-note button { background:none; color:#9a7b3f; font-size:13px; padding:0; }
 
   /* ---------- Layout helpers ---------- */
   .stack > * + * { margin-top: 20px; }
@@ -162,6 +172,55 @@
   }
   .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 4px 12px rgba(138,164,214,.4); }
 
+  /* ---------- Timeline search + mood filter + insights (NEW) ---------- */
+  .tl-tools { margin-top: 14px; }
+  .tl-search-wrap { position: relative; }
+  .tl-search-wrap > svg {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--ink-faint); pointer-events: none;
+  }
+  #tl-search { padding-left: 42px; }
+  .moodfilter { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+  .mf {
+    padding: 7px 13px; border-radius: 999px; background: var(--card); color: var(--ink-soft);
+    border: 1px solid var(--line); font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px; transition: all .15s;
+  }
+  .mf:hover { border-color: var(--lav); }
+  .mf.on { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--lav); }
+  .dayfilter-pill {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 12px;
+    background: var(--accent-soft); color: var(--accent-deep); padding: 7px 14px;
+    border-radius: 999px; font-size: 13px; font-weight: 600;
+  }
+  .dayfilter-pill button { background: none; color: inherit; font-size: 15px; line-height: 1; padding: 0; }
+
+  .insights-toggle { margin-top: 16px; }
+  .insight-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow-soft); padding: 20px; margin-top: 14px;
+  }
+  .insight-card h4 { margin: 0 0 6px; font-size: 14px; color: var(--ink-soft); font-weight: 600; letter-spacing: .2px; }
+  .insight-card .hint { color: var(--ink-faint); font-size: 13px; }
+  .spark { width: 100%; height: 110px; display: block; }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-head .cal-title { font-weight: 600; color: var(--ink); font-size: 15px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow { text-align: center; font-size: 11px; color: var(--ink-faint); font-weight: 600; padding-bottom: 4px; }
+  .cal-cell {
+    aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; font-size: 13px; color: var(--ink-soft);
+    background: transparent; border: 1px solid transparent;
+  }
+  .cal-cell.filled { background: var(--bg-soft); }
+  .cal-cell.has { color: var(--accent-deep); font-weight: 700; cursor: pointer; }
+  .cal-cell.has::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-top: 3px; }
+  .cal-cell.today { border-color: var(--lav); }
+  .cal-cell.sel { background: var(--accent); color: #fff; }
+  .cal-cell.sel::after { background: #fff; }
+  .cal-cell.has:hover { border-color: var(--lav); }
+
+  /* ---------- Entry cards ---------- */
   .entry {
     background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
     box-shadow: var(--shadow-soft); padding: 20px; margin-top: 14px; animation: rise .4s ease both;
@@ -183,6 +242,53 @@
   .e-media { margin-top: 14px; border-radius: var(--radius-sm); overflow: hidden; max-width: 100%; }
   .e-media img, .e-media video { width: 100%; display: block; border-radius: var(--radius-sm); }
   .e-actions { margin-top: 14px; display: flex; gap: 6px; justify-content: flex-end; }
+
+  /* ---------- Timeline carousel ---------- */
+  .carousel { position: relative; margin-top: 16px; }
+  .carousel-track {
+    position: relative; display: flex; gap: 16px;
+    overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px;
+  }
+  .carousel-track::-webkit-scrollbar { display: none; }
+  .carousel-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; display: flex; }
+  .carousel-slide .entry { margin-top: 0; width: 100%; animation: none; }
+  /* side arrows (desktop only, sit in the outer margin so they never cover text) */
+  .car-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #fff; color: var(--accent-deep); border: 1px solid var(--line);
+    box-shadow: var(--shadow-soft); display: none; place-items: center;
+    font-size: 24px; line-height: 1; padding-bottom: 3px;
+    transition: background .15s, transform .1s, opacity .15s;
+  }
+  .car-arrow:hover { background: var(--accent-soft); }
+  .car-arrow:active { transform: translateY(-50%) scale(.92); }
+  .car-arrow.prev { left: -58px; }
+  .car-arrow.next { right: -58px; }
+  .car-arrow[disabled] { opacity: .3; cursor: default; box-shadow: none; }
+  @media (min-width: 900px) { .car-arrow { display: grid; } }
+  /* footer controls (all screen sizes) */
+  .carousel-nav { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 16px; }
+  .car-counter { font-size: 13px; font-weight: 700; color: var(--ink-soft); min-width: 58px; text-align: center; letter-spacing: .3px; }
+  .car-nav-btn[disabled] { opacity: .4; cursor: default; }
+  .carousel-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .car-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--lav); opacity: .55; border: none; padding: 0; cursor: pointer; transition: transform .2s, opacity .2s, background .2s; }
+  .car-dot:hover { opacity: .85; }
+  .car-dot.on { opacity: 1; background: var(--accent-deep); transform: scale(1.3); }
+  .car-hint { text-align: center; color: var(--ink-faint); font-size: 12.5px; margin-top: 12px; }
+
+  /* ---------- Timeline stat (one motivating fact per visit) ---------- */
+  .tl-stat {
+    display: flex; align-items: center; gap: 13px; justify-content: center;
+    text-align: center; margin-top: 18px; padding: 15px 20px; border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, #efeafb 100%);
+    border: 1px solid var(--line); color: var(--ink);
+    font-size: 15px; font-weight: 600; line-height: 1.45;
+    box-shadow: var(--shadow-soft); animation: rise .4s ease both;
+  }
+  .tl-stat .st-em { font-size: 24px; line-height: 1; flex: 0 0 auto; }
+  .tl-stat .st-num { color: var(--accent-deep); font-weight: 800; }
 
   /* ---------- Feeling down / memory cards ---------- */
   .memory {
@@ -226,6 +332,27 @@
 
   .empty { text-align: center; color: var(--ink-faint); padding: 50px 20px; }
   .empty .big-em { font-size: 40px; }
+
+  /* ---------- Just breathe (box breathing) ---------- */
+  .breathe-wrap { text-align: center; padding: 6px 0 8px; }
+  .breathe-stage { position: relative; width: 260px; height: 260px; max-width: 78vw; margin: 22px auto 6px; display: grid; place-items: center; }
+  .breathe-track { position: absolute; inset: 0; border: 2px solid var(--line); border-radius: 28px; }
+  .breathe-box {
+    width: 108px; height: 108px; border-radius: 24px;
+    background: radial-gradient(circle at 32% 28%, #fff 0%, var(--accent) 66%, var(--accent-deep) 100%);
+    box-shadow: 0 12px 30px rgba(111,139,199,.42);
+    transform: scale(.58); transition: transform 4s ease-in-out;
+  }
+  .breathe-box.big { transform: scale(1); }
+  .breathe-dot {
+    position: absolute; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent-deep); box-shadow: 0 0 0 5px var(--accent-soft);
+    top: -9px; left: -9px; transition: transform 4s linear;
+  }
+  .breathe-phase { font-family: var(--serif); font-size: 24px; color: var(--accent-deep); margin-top: 22px; min-height: 30px; }
+  .breathe-count { font-size: 44px; font-weight: 800; color: var(--ink); min-height: 52px; line-height: 1.1; }
+  .breathe-cycles { color: var(--ink-faint); font-size: 13px; font-weight: 600; }
+  .breathe-controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
 
   @media (max-width: 520px) {
     h1.big { font-size: 26px; }
@@ -328,6 +455,21 @@
         <button class="chip" data-range="year">This year</button>
         <button class="chip" data-range="all">All</button>
       </div>
+
+      <!-- NEW: search + mood filter + insights -->
+      <div class="tl-tools">
+        <div class="tl-search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="tl-search" placeholder="Search your gratitude…" autocomplete="off" />
+        </div>
+        <div class="moodfilter" id="tl-mood-filter"></div>
+        <div id="dayfilter-slot"></div>
+        <button class="btn subtle sm insights-toggle" id="btn-insights">Show insights ▾</button>
+        <div id="insights" class="hide"></div>
+      </div>
+
+      <div id="tl-stat" class="tl-stat hide"></div>
+
       <div id="timeline-list" style="margin-top:6px;"></div>
     </section>
 
@@ -338,6 +480,35 @@
         <p class="sub">Here's something good from your past.</p>
       </div>
       <div id="comfort-area"></div>
+    </section>
+
+    <!-- ---- JUST BREATHE VIEW ---- -->
+    <section id="view-breathe" class="view hide">
+      <div style="padding:22px 0 6px;">
+        <div class="row between">
+          <h1 class="big" style="margin-bottom:0;">Just breathe</h1>
+          <button class="icon-btn" id="btn-breathe-info" title="Why box breathing helps" aria-label="Why box breathing helps">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          </button>
+        </div>
+        <p class="sub">Box breathing — 4 in · 4 hold · 4 out · 4 hold.</p>
+      </div>
+      <div class="card">
+        <div class="breathe-wrap">
+          <div class="breathe-stage">
+            <div class="breathe-track"><div class="breathe-dot" id="breathe-dot"></div></div>
+            <div class="breathe-box" id="breathe-box"></div>
+          </div>
+          <div class="breathe-phase" id="breathe-phase">Ready when you are</div>
+          <div class="breathe-count" id="breathe-count"></div>
+          <div class="breathe-cycles" id="breathe-cycles">Cycle 0</div>
+          <div class="breathe-controls">
+            <button class="btn" id="btn-breathe-start">Start</button>
+            <button class="btn ghost" id="btn-breathe-reset">Reset</button>
+          </div>
+          <p class="faint" style="margin-top:20px;line-height:1.5;">Follow the dot around the square. Breathe in as it grows, hold, breathe out as it shrinks, hold — repeat as long as you like.</p>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -353,6 +524,10 @@
     <button data-view="comfort" id="tab-comfort">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
       Comfort
+    </button>
+    <button data-view="breathe" id="tab-breathe">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg>
+      Breathe
     </button>
   </nav>
 </div>
@@ -374,19 +549,153 @@ const SUPABASE_ANON_KEY = "sb_publishable_1UUejE0VZwDWK2hAiKzTKw_OHWnhbHy";
 
 // ---------- Boot / config guard ----------
 let sb = null;
-const configured = SUPABASE_URL && !SUPABASE_URL.includes("PASTE_") &&
-                   SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("PASTE_");
+let configured = false;
 
-if (configured) {
-  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* ================================================================
+   LOCAL PREVIEW MODE (NEW)
+   When this file is opened straight from your computer (file://…)
+   or a local server (localhost), email login can't complete — the
+   magic link that Supabase emails has nowhere to return to. So in
+   that situation we run a self-contained OFFLINE preview: you're
+   signed in automatically and entries are saved in THIS browser only.
+
+   On your real published site (https://…github.io) this whole block
+   is skipped and normal Supabase email login is used — so deploying
+   this file changes nothing about the live experience.
+   ================================================================ */
+const LOCAL_PREVIEW = location.protocol === "file:" ||
+  ["localhost", "127.0.0.1", ""].includes(location.hostname);
+const PREVIEW_USER = { id: "local-preview-user", email: "preview@on-this-device" };
+
+if (LOCAL_PREVIEW) {
+  sb = makeLocalDB();
+  configured = true;
+  seedPreviewData();
 } else {
-  document.getElementById("screen-auth").innerHTML =
-    '<div class="wrap" style="max-width:520px;"><div class="auth-hero"><div class="bloom"></div>' +
-    '<h1>Almost there</h1></div><div class="card"><h3>One quick setup step</h3>' +
-    '<p class="muted">This journal needs to be connected to your free Supabase account before it can log you in.</p>' +
-    '<p class="muted">Open <b>SETUP-GUIDE.md</b> (it came with this file) and follow the short steps. ' +
-    'You\'ll paste two values into the bottom of this file — that\'s it.</p>' +
-    '<p class="faint">Everything else is already built and ready.</p></div></div>';
+  configured = SUPABASE_URL && !SUPABASE_URL.includes("PASTE_") &&
+               SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("PASTE_");
+  if (configured) {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+    document.getElementById("screen-auth").innerHTML =
+      '<div class="wrap" style="max-width:520px;"><div class="auth-hero"><div class="bloom"></div>' +
+      '<h1>Almost there</h1></div><div class="card"><h3>One quick setup step</h3>' +
+      '<p class="muted">This journal needs to be connected to your free Supabase account before it can log you in.</p>' +
+      '<p class="muted">Open <b>SETUP-GUIDE.md</b> (it came with this file) and follow the short steps. ' +
+      'You\'ll paste two values into the bottom of this file — that\'s it.</p>' +
+      '<p class="faint">Everything else is already built and ready.</p></div></div>';
+  }
+}
+
+/* ---------- Offline data layer used only in LOCAL_PREVIEW ---------- */
+function makeLocalDB() {
+  const LS_KEY = "grateful_preview_entries";
+  const MED_KEY = "grateful_preview_media";
+  const load = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch (e) { return []; } };
+  const save = (rows) => { try { localStorage.setItem(LS_KEY, JSON.stringify(rows)); } catch (e) {} };
+  const loadMedia = () => { try { return JSON.parse(localStorage.getItem(MED_KEY)) || {}; } catch (e) { return {}; } };
+  const saveMedia = (m) => { try { localStorage.setItem(MED_KEY, JSON.stringify(m)); } catch (e) {} };
+  const newId = () => "local-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+
+  function Query() {
+    return {
+      _op: "select", _filters: [], _gte: null, _order: null, _single: false, _payload: null,
+      select() { this._op = "select"; return this; },
+      insert(p) { this._op = "insert"; this._payload = p; return this; },
+      update(p) { this._op = "update"; this._payload = p; return this; },
+      delete() { this._op = "delete"; return this; },
+      eq(c, v) { this._filters.push([c, v]); return this; },
+      gte(c, v) { this._gte = [c, v]; return this; },
+      order(c, o) { this._order = [c, o]; return this; },
+      single() { this._single = true; return this; },
+      _match(rows) {
+        let r = rows.filter(row => this._filters.every(([c, v]) => row[c] === v));
+        if (this._gte) { const [c, v] = this._gte; r = r.filter(row => new Date(row[c]) >= new Date(v)); }
+        return r;
+      },
+      _run() {
+        let rows = load();
+        try {
+          if (this._op === "select") {
+            let r = this._match(rows);
+            if (this._order) {
+              const [c, o] = this._order; const asc = o && o.ascending;
+              r = r.slice().sort((a, b) => asc ? new Date(a[c]) - new Date(b[c]) : new Date(b[c]) - new Date(a[c]));
+            }
+            if (this._single) return { data: r[0] || null, error: r[0] ? null : { message: "No row found" } };
+            return { data: r, error: null };
+          }
+          if (this._op === "insert") {
+            const p = Array.isArray(this._payload) ? this._payload : [this._payload];
+            const created = p.map(rec => Object.assign({ id: newId(), created_at: new Date().toISOString() }, rec));
+            save(rows.concat(created));
+            return { data: created, error: null };
+          }
+          if (this._op === "update") {
+            const m = this._match(rows);
+            save(rows.map(row => m.includes(row) ? Object.assign(row, this._payload) : row));
+            return { data: m, error: null };
+          }
+          if (this._op === "delete") {
+            const m = this._match(rows);
+            save(rows.filter(row => !m.includes(row)));
+            return { data: m, error: null };
+          }
+        } catch (e) { return { data: null, error: { message: e.message } }; }
+        return { data: null, error: null };
+      },
+      then(res, rej) { return Promise.resolve().then(() => this._run()).then(res, rej); }
+    };
+  }
+
+  return {
+    auth: {
+      _cb: null,
+      async getSession() { return { data: { session: { user: PREVIEW_USER } } }; },
+      onAuthStateChange(cb) { this._cb = cb; return { data: { subscription: { unsubscribe() {} } } }; },
+      async signInWithOtp() { return { error: null }; },
+      async signOut() { if (this._cb) this._cb("SIGNED_OUT", null); return { error: null }; },
+    },
+    from() { return Query(); },
+    storage: {
+      from() {
+        return {
+          async upload(path, file) {
+            try {
+              const dataUrl = await new Promise((res, rej) => {
+                const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(file);
+              });
+              const m = loadMedia(); m[path] = dataUrl; saveMedia(m);
+            } catch (e) { return { error: { message: "Preview upload failed (file may be too large for local storage)." } }; }
+            return { error: null };
+          },
+          getPublicUrl(path) { const m = loadMedia(); return { data: { publicUrl: m[path] || "" } }; },
+          async remove(paths) { const m = loadMedia(); (paths || []).forEach(p => delete m[p]); saveMedia(m); return { error: null }; },
+        };
+      }
+    }
+  };
+}
+
+/* ---------- A few gentle sample entries for the preview ---------- */
+function seedPreviewData() {
+  const KEY = "grateful_preview_entries";
+  let rows; try { rows = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { rows = []; }
+  if (rows.length) return; // don't overwrite anything already there
+  const day = (n) => { const d = new Date(); d.setDate(d.getDate() - n); d.setHours(9, 0, 0, 0); return d.toISOString(); };
+  const mk = (id, daysAgo, grats, mood, notes) => ({
+    id, created_at: day(daysAgo), user_id: PREVIEW_USER.id,
+    gratitude: grats, mood, notes: notes || null, media_url: null, media_type: null, media_path: null,
+  });
+  const sample = [
+    mk("s1", 1, ["a slow morning coffee", "my sister called just to chat"], "Loved", "Small day, good day."),
+    mk("s2", 3, ["finished a task I'd been dreading", "sunshine on the walk home"], "Good", null),
+    mk("s3", 6, ["a quiet house", "leftovers that still tasted great"], "Okay", null),
+    mk("s4", 12, ["a kind message from an old friend"], "Appreciated", "Didn't expect it."),
+    mk("s5", 22, ["got through a hard week", "a long hot shower"], "Overwhelmed", null),
+    mk("s6", 34, ["my favourite song came on shuffle", "a stranger held the door"], "Good", null),
+  ];
+  try { localStorage.setItem(KEY, JSON.stringify(sample)); } catch (e) {}
 }
 
 // ---------- Constants ----------
@@ -400,6 +709,8 @@ const MOODS = [
 ];
 // Moods considered "positive" for the Feeling-down feature
 const POSITIVE_MOODS = ["Appreciated", "Loved", "Good"];
+// Numeric valence used for the mood-trend chart (higher = happier)
+const MOOD_VALUE = { Sad: 0, Overwhelmed: 1, Okay: 2, Good: 3, Appreciated: 4, Loved: 5 };
 const MEMORY_LINES = [
   "Remember this?",
   "You were grateful for this once.",
@@ -414,6 +725,15 @@ let editingId = null;      // entry id being edited, or null
 let pickedFile = null;     // File object staged for upload
 let removeMedia = false;   // when editing, user cleared existing media
 let currentMood = null;
+
+// Timeline / insights state (NEW)
+let timelineData = [];        // entries for the current range
+let activeMoodFilter = null;  // mood key or null
+let dayFilter = null;         // 'YYYY-MM-DD' or null
+let entryDays = new Map();    // 'YYYY-MM-DD' -> count (all-time, for calendar)
+let calMonth = startOfMonth(new Date());
+let carouselMove = null;      // (dir) => navigate carousel; set when a multi-card carousel is live
+let timelineStat = null;      // one motivating stat, chosen per range load
 
 // ---------- Helpers ----------
 const $ = (id) => document.getElementById(id);
@@ -434,6 +754,11 @@ function greetingWord() {
   if (h < 18) return "Good afternoon";
   return "Good evening";
 }
+function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+function ymd(d) {
+  const x = new Date(d);
+  return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0");
+}
 
 // ======================================================
 //  AUTH
@@ -452,8 +777,17 @@ function onLogin(user) {
   USER = user;
   $("screen-auth").classList.add("hide");
   $("screen-app").classList.remove("hide");
-  $("who").textContent = user.email;
+  $("who").textContent = LOCAL_PREVIEW ? "Local preview" : user.email;
+  if (LOCAL_PREVIEW && !$("preview-banner")) {
+    const b = document.createElement("div");
+    b.id = "preview-banner";
+    b.style = "background:#eef3ff;color:#5a6b96;border-bottom:1px solid var(--line);font-size:12.5px;text-align:center;padding:8px 16px;line-height:1.4;";
+    b.innerHTML = "🔒 <b>Local preview</b> — you're signed in automatically and these entries are saved on this device only. Your published site still uses normal email login.";
+    $("screen-app").insertBefore(b, $("screen-app").children[1]);
+  }
+  calMonth = startOfMonth(new Date());
   buildWriteForm();
+  loadEntryDays();
   // Clean the magic-link tokens out of the URL bar
   if (window.location.hash.includes("access_token")) {
     history.replaceState(null, "", window.location.pathname);
@@ -482,11 +816,59 @@ async function sendMagicLink() {
 }
 
 // ======================================================
+//  DRAFT AUTOSAVE (NEW) — protects an unsaved entry from
+//  accidental navigation / refresh. Stored per-user locally.
+// ======================================================
+let _draftT = null;
+function draftKey() { return USER ? "grateful_draft_" + USER.id : null; }
+function saveDraftDebounced() { clearTimeout(_draftT); _draftT = setTimeout(saveDraft, 400); }
+function saveDraft() {
+  if (editingId || !USER) return; // don't autosave while editing an existing entry
+  const key = draftKey(); if (!key) return;
+  const grats = [...document.querySelectorAll(".grat-input")].map(t => t.value);
+  const notes = ($("notes") && $("notes").value) || "";
+  const hasContent = grats.some(g => g.trim()) || notes.trim() || currentMood;
+  try {
+    if (!hasContent) { localStorage.removeItem(key); return; }
+    localStorage.setItem(key, JSON.stringify({ grats, notes, mood: currentMood, ts: Date.now() }));
+  } catch (e) { /* storage full / blocked — ignore */ }
+}
+function clearDraft() { const k = draftKey(); if (k) { try { localStorage.removeItem(k); } catch (e) {} } }
+function restoreDraft() {
+  if (editingId || !USER) return;
+  let raw; try { raw = localStorage.getItem(draftKey()); } catch (e) { return; }
+  if (!raw) return;
+  let d; try { d = JSON.parse(raw); } catch (e) { return; }
+  if (!d) return;
+  const arr = (d.grats && d.grats.length) ? d.grats : ["", "", ""];
+  const box = $("grat-fields"); box.innerHTML = "";
+  arr.forEach(g => addGratField(g));
+  while (document.querySelectorAll(".grat-input").length < 3) addGratField();
+  if ($("notes")) $("notes").value = d.notes || "";
+  if (d.mood) {
+    currentMood = d.mood;
+    document.querySelectorAll("#moods .mood").forEach(x => x.classList.toggle("on", x.dataset.mood === d.mood));
+  }
+  const meaningful = (d.grats && d.grats.some(g => g.trim())) || (d.notes && d.notes.trim());
+  if (meaningful && !$("draft-note")) {
+    const n = document.createElement("div");
+    n.id = "draft-note"; n.className = "draft-note";
+    n.innerHTML = "<span>Restored a note you hadn't saved yet 🌿</span>";
+    const x = document.createElement("button"); x.textContent = "Start fresh";
+    x.onclick = () => { clearDraft(); n.remove(); buildWriteForm(); };
+    n.appendChild(x);
+    $("view-write").insertBefore(n, $("view-write").children[1]);
+  }
+}
+
+// ======================================================
 //  WRITE FORM
 // ======================================================
 function buildWriteForm() {
   $("today-date").textContent = fmtDate(new Date());
   $("greeting").textContent = greetingWord();
+  // remove any leftover draft note
+  const dn = $("draft-note"); if (dn) dn.remove();
   // gratitude fields (start with 3)
   const box = $("grat-fields");
   box.innerHTML = "";
@@ -504,9 +886,12 @@ function buildWriteForm() {
         document.querySelectorAll("#moods .mood").forEach(x => x.classList.remove("on"));
         b.classList.add("on");
       }
+      saveDraft();
     };
     mb.appendChild(b);
   });
+  // restore any unsaved draft (only for a fresh, non-editing form)
+  restoreDraft();
 }
 
 function addGratField(value = "") {
@@ -515,6 +900,7 @@ function addGratField(value = "") {
   const ta = document.createElement("textarea");
   ta.placeholder = "I'm grateful for…";
   ta.className = "grat-input"; ta.rows = 1; ta.value = value;
+  ta.addEventListener("input", saveDraftDebounced);
   const mic = document.createElement("button");
   mic.className = "icon-btn"; mic.type = "button"; mic.title = "Speak instead of typing";
   mic.innerHTML = micSvg();
@@ -531,20 +917,36 @@ let recognizer = null;
 function startDictation(target, micBtn) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { toast("Voice typing isn't supported in this browser. Try Chrome or Safari."); return; }
-  if (recognizer) { recognizer.stop(); recognizer = null; micBtn.classList.remove("rec"); return; }
+  if (recognizer) { recognizer.stop(); recognizer = null; micBtn.classList.remove("rec"); target.classList.remove("listening"); return; }
   recognizer = new SR();
   recognizer.lang = navigator.language || "en-US";
   recognizer.interimResults = true;
   recognizer.continuous = false;
   const base = target.value ? target.value.trim() + " " : "";
   micBtn.classList.add("rec");
+  // clearer recording state (NEW)
+  target.classList.add("listening");
+  target._ph = target.placeholder;
+  target.placeholder = "Listening… speak now";
+  toast("Listening… speak now 🎙️");
   recognizer.onresult = (e) => {
     let txt = "";
     for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
     target.value = base + txt;
+    saveDraftDebounced();
   };
-  recognizer.onerror = () => { toast("Couldn't hear that — try again."); };
-  recognizer.onend = () => { micBtn.classList.remove("rec"); recognizer = null; };
+  recognizer.onerror = (ev) => {
+    if (ev && (ev.error === "not-allowed" || ev.error === "service-not-allowed")) {
+      toast("Microphone access is blocked. Allow it in your browser to use voice.");
+    } else {
+      toast("Couldn't hear that — try again.");
+    }
+  };
+  recognizer.onend = () => {
+    micBtn.classList.remove("rec"); recognizer = null;
+    target.classList.remove("listening");
+    if (target._ph !== undefined) target.placeholder = target._ph;
+  };
   recognizer.start();
 }
 
@@ -579,6 +981,7 @@ async function saveEntry() {
     toast("Add at least one thing you're grateful for."); return;
   }
 
+  const wasEditing = !!editingId;
   const btn = $("btn-save");
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
 
@@ -618,14 +1021,24 @@ async function saveEntry() {
     }
     if (error) throw error;
 
-    toast(editingId ? "Entry updated 🌿" : "Saved. Well done today. 🌿");
-    resetForm();
-    switchView("timeline");
-    loadTimeline();
+    // soft, non-jarring confirmation (NEW): flash the button green, then move on
+    if (!wasEditing) clearDraft();
+    btn.classList.add("ok");
+    btn.textContent = wasEditing ? "Updated ✓" : "Saved ✓";
+    toast(wasEditing ? "Entry updated 🌿" : "Saved. Well done today. 🌿");
+    setTimeout(() => {
+      btn.classList.remove("ok");
+      resetForm();
+      switchView("timeline");
+      loadTimeline();
+      loadEntryDays();
+    }, 650);
   } catch (err) {
     toast("Something went wrong: " + (err.message || err));
+    btn.classList.remove("ok");
+    btn.textContent = wasEditing ? "Update this entry" : "Save today's gratitude";
   } finally {
-    btn.disabled = false; btn.textContent = "Save today's gratitude";
+    btn.disabled = false;
   }
 }
 
@@ -664,12 +1077,190 @@ async function loadTimeline() {
   if (start) q = q.gte("created_at", start);
   const { data, error } = await q;
   if (error) { list.innerHTML = `<div class="empty">Couldn't load entries: ${esc(error.message)}</div>`; return; }
-  if (!data.length) {
-    list.innerHTML = `<div class="empty"><div class="big-em">🌱</div><p>No entries in this window yet.<br>Your gratitude will grow here.</p></div>`;
+  timelineData = data || [];
+  buildTimelineStat();   // pick one motivating stat for this visit
+  renderTimeline();
+  renderInsights();
+}
+
+// Choose ONE positive, motivating stat about the current range.
+// Recomputed only when the range (re)loads, so it stays steady while you search/filter.
+function buildTimelineStat() {
+  const rows = timelineData;
+  const n = rows.length;
+  if (!n) { timelineStat = null; return; }
+
+  const label = { week: "this week", month: "this month", year: "this year", all: "so far" }[currentRange] || "so far";
+  const totalItems = rows.reduce((s, e) => s + ((e.gratitude || []).length), 0);
+  const days = new Set(rows.map(e => ymd(e.created_at))).size;
+  const withMood = rows.filter(e => e.mood);
+  const moodCount = {};
+  withMood.forEach(e => { moodCount[e.mood] = (moodCount[e.mood] || 0) + 1; });
+  const pct = (k) => withMood.length ? Math.round((moodCount[k] || 0) / withMood.length * 100) : 0;
+  const posCount = withMood.filter(e => POSITIVE_MOODS.includes(e.mood)).length;
+  const posPct = withMood.length ? Math.round(posCount / withMood.length * 100) : 0;
+
+  const pool = [];
+  const add = (em, html) => pool.push({ em, html });
+
+  // Volume & consistency — always uplifting
+  if (totalItems > 0) add("🌱", `You've named <span class="st-num">${totalItems}</span> good thing${totalItems !== 1 ? "s" : ""} ${label}.`);
+  add("📖", `You showed up <span class="st-num">${n}</span> time${n !== 1 ? "s" : ""} ${label} — that's a practice.`);
+  if (days > 1) add("🗓️", `You wrote on <span class="st-num">${days}</span> different days ${label}. Keep it going.`);
+  if (n >= 3 && totalItems >= n) {
+    const avg = totalItems / n;
+    add("✨", `You find about <span class="st-num">${avg.toFixed(avg % 1 ? 1 : 0)}</span> good things every time you write.`);
+  }
+
+  // Mood percentages — framed to motivate
+  if (withMood.length) {
+    if (posPct > 0) add("🌿", `<span class="st-num">${posPct}%</span> of your moments ${label} felt good or better.`);
+    if (pct("Appreciated") > 0) add("🌿", `You felt <b>appreciated</b> in <span class="st-num">${pct("Appreciated")}%</span> of your entries ${label}.`);
+    if (pct("Loved") > 0) add("💗", `<span class="st-num">${pct("Loved")}%</span> of your entries ${label} were full of love.`);
+    if (pct("Good") > 0) add("🙂", `You felt <b>good</b> <span class="st-num">${pct("Good")}%</span> of the time ${label}.`);
+    // Most common feeling — only surface it when it's a bright one
+    const top = Object.entries(moodCount).sort((a, b) => b[1] - a[1])[0];
+    if (top && POSITIVE_MOODS.includes(top[0])) add(moodEm(top[0]), `Your most common feeling ${label}: <b>${esc(top[0])}</b>.`);
+    // Harder moods present — reframe as resilience, never a discouraging number
+    const hard = withMood.filter(e => ["Okay", "Overwhelmed", "Sad"].includes(e.mood)).length;
+    if (hard > 0) add("🌤️", `You kept finding things to be grateful for, even on the harder days.`);
+  }
+
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  timelineStat = `<span class="st-em">${pick.em}</span><span>${pick.html}</span>`;
+}
+
+// Apply the client-side search + mood + day filters, then paint (NEW)
+function renderTimeline() {
+  const list = $("timeline-list");
+  const q = (($("tl-search") && $("tl-search").value) || "").trim().toLowerCase();
+  let rows = timelineData;
+  if (activeMoodFilter) rows = rows.filter(e => e.mood === activeMoodFilter);
+  if (dayFilter) rows = rows.filter(e => ymd(e.created_at) === dayFilter);
+  if (q) rows = rows.filter(e => {
+    const hay = [...(e.gratitude || []), e.notes || ""].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+  renderDayPill();
+  // motivating stat for the range (independent of search/mood filters)
+  const statEl = $("tl-stat");
+  if (statEl) {
+    if (timelineStat) { statEl.innerHTML = timelineStat; statEl.classList.remove("hide"); }
+    else { statEl.innerHTML = ""; statEl.classList.add("hide"); }
+  }
+  carouselMove = null; // reset; re-established below if we have >1 card
+  if (!rows.length) {
+    const filtered = q || activeMoodFilter || dayFilter;
+    list.innerHTML = filtered
+      ? `<div class="empty"><div class="big-em">🔍</div><p>Nothing matches that here.<br>Try a different word, mood or day.</p></div>`
+      : `<div class="empty"><div class="big-em">🌱</div><p>No entries in this window yet.<br>Your gratitude will grow here.</p></div>`;
     return;
   }
-  list.innerHTML = data.map(renderEntry).join("");
+
+  // ---- Carousel: one entry visible at a time, swipe on mobile, arrows/keys on desktop ----
+  const slides = rows.map(e => `<div class="carousel-slide">${renderEntry(e)}</div>`).join("");
+  const many = rows.length > 1;
+  list.innerHTML = `
+    <div class="carousel">
+      <button class="car-arrow prev" id="car-prev-arrow" aria-label="Previous entry">‹</button>
+      <div class="carousel-track" id="car-track">${slides}</div>
+      <button class="car-arrow next" id="car-next-arrow" aria-label="Next entry">›</button>
+    </div>
+    ${many ? `
+      <div class="carousel-nav">
+        <button class="btn ghost sm car-nav-btn" id="car-prev">‹ Prev</button>
+        <span class="car-counter" id="car-counter"></span>
+        <button class="btn ghost sm car-nav-btn" id="car-next">Next ›</button>
+      </div>
+      <div class="carousel-dots" id="car-dots"></div>
+      <p class="car-hint">Swipe, tap the arrows, or use ← → keys</p>
+    ` : ""}`;
+  if (many) wireCarousel(rows.length);
 }
+
+// Wire up a freshly-rendered carousel: dots, counter, arrows, swipe sync, keyboard.
+function wireCarousel(n) {
+  const track = $("car-track");
+  if (!track) return;
+  const dotsBox = $("car-dots");
+  const counter = $("car-counter");
+  const prev = $("car-prev"), next = $("car-next");
+  const prevA = $("car-prev-arrow"), nextA = $("car-next-arrow");
+  let index = 0;
+
+  // dots
+  const dots = [];
+  dotsBox.innerHTML = "";
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement("button");
+    d.className = "car-dot" + (i === 0 ? " on" : "");
+    d.setAttribute("aria-label", "Go to entry " + (i + 1));
+    d.onclick = () => goTo(i);
+    dotsBox.appendChild(d); dots.push(d);
+  }
+
+  const slidesOf = () => [...track.children];
+  const step = () => {
+    const s = slidesOf();
+    return s.length > 1 ? Math.max(1, s[1].offsetLeft - s[0].offsetLeft) : track.clientWidth || 1;
+  };
+  function paint(i) {
+    index = Math.max(0, Math.min(n - 1, i));
+    dots.forEach((d, k) => d.classList.toggle("on", k === index));
+    if (counter) counter.textContent = (index + 1) + " / " + n;
+    [prev, prevA].forEach(b => b && (b.disabled = index === 0));
+    [next, nextA].forEach(b => b && (b.disabled = index === n - 1));
+  }
+  function goTo(i) {
+    const s = slidesOf();
+    i = Math.max(0, Math.min(n - 1, i));
+    track.scrollTo({ left: s[i].offsetLeft, behavior: "smooth" });
+    paint(i);
+  }
+  const move = (dir) => goTo(index + dir);
+
+  if (prev)  prev.onclick  = () => move(-1);
+  if (next)  next.onclick  = () => move(1);
+  if (prevA) prevA.onclick = () => move(-1);
+  if (nextA) nextA.onclick = () => move(1);
+
+  // keep indicators in sync with native touch scrolling
+  let st;
+  track.addEventListener("scroll", () => {
+    clearTimeout(st);
+    st = setTimeout(() => paint(Math.round(track.scrollLeft / step())), 90);
+  });
+
+  paint(0);
+  carouselMove = move; // expose to keyboard handler
+}
+
+function buildMoodFilter() {
+  const box = $("tl-mood-filter"); if (!box || box.dataset.built) return;
+  box.dataset.built = "1";
+  const mk = (label, key, em) => {
+    const b = document.createElement("button");
+    b.className = "mf" + (key === activeMoodFilter ? " on" : "");
+    b.dataset.mood = key || "";
+    b.innerHTML = (em ? `<span>${em}</span>` : "") + label;
+    b.onclick = () => {
+      activeMoodFilter = key;
+      document.querySelectorAll("#tl-mood-filter .mf")
+        .forEach(x => x.classList.toggle("on", (x.dataset.mood || null) === key));
+      renderTimeline();
+    };
+    return b;
+  };
+  box.appendChild(mk("All moods", null, ""));
+  MOODS.forEach(m => box.appendChild(mk(m.key, m.key, m.em)));
+}
+
+function renderDayPill() {
+  const slot = $("dayfilter-slot"); if (!slot) return;
+  if (!dayFilter) { slot.innerHTML = ""; return; }
+  slot.innerHTML = `<span class="dayfilter-pill">${fmtShort(dayFilter + "T00:00:00")} <button title="Clear day" onclick="clearDayFilter()">✕</button></span>`;
+}
+function clearDayFilter() { dayFilter = null; renderTimeline(); renderInsights(); }
 
 function moodEm(key) { const m = MOODS.find(x => x.key === key); return m ? m.em : ""; }
 
@@ -698,12 +1289,101 @@ function renderEntry(e) {
     </article>`;
 }
 
+// ======================================================
+//  INSIGHTS — mood trend chart + calendar (NEW)
+// ======================================================
+async function loadEntryDays() {
+  if (!configured || !USER) return;
+  const { data, error } = await sb.from("entries").select("created_at").eq("user_id", USER.id);
+  entryDays = new Map();
+  if (!error && data) {
+    data.forEach(e => { const k = ymd(e.created_at); entryDays.set(k, (entryDays.get(k) || 0) + 1); });
+  }
+  if ($("insights") && !$("insights").classList.contains("hide")) renderInsights();
+}
+
+function renderInsights() {
+  const panel = $("insights");
+  if (!panel || panel.classList.contains("hide")) return;
+  panel.innerHTML = sparkCard() + calCard();
+}
+
+function sparkCard() {
+  const pts = timelineData
+    .filter(e => e.mood && MOOD_VALUE[e.mood] !== undefined)
+    .slice()
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  if (pts.length < 2) {
+    return `<div class="insight-card"><h4>Mood trend</h4>
+      <p class="hint">Log a mood on a couple of entries and your trend will gently appear here.</p></div>`;
+  }
+  const W = 560, H = 90, pad = 14, n = pts.length;
+  const xs = (i) => pad + (n === 1 ? 0 : i * (W - 2 * pad) / (n - 1));
+  const ys = (v) => (H - pad) - (v / 5) * (H - 2 * pad);
+  const line = pts.map((e, i) => `${i ? "L" : "M"}${xs(i).toFixed(1)},${ys(MOOD_VALUE[e.mood]).toFixed(1)}`).join(" ");
+  const dots = pts.map((e, i) =>
+    `<circle cx="${xs(i).toFixed(1)}" cy="${ys(MOOD_VALUE[e.mood]).toFixed(1)}" r="4" fill="var(--accent-deep)"><title>${esc(e.mood)} · ${fmtShort(e.created_at)}</title></circle>`
+  ).join("");
+  return `<div class="insight-card"><h4>Mood trend</h4>
+    <svg class="spark" viewBox="0 0 ${W} ${H}">
+      <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}
+    </svg>
+    <div class="row between">
+      <span class="hint">${fmtShort(pts[0].created_at)}</span>
+      <span class="hint">↑ happier</span>
+      <span class="hint">${fmtShort(pts[n - 1].created_at)}</span>
+    </div></div>`;
+}
+
+function calCard() {
+  const y = calMonth.getFullYear(), m = calMonth.getMonth();
+  const monthName = calMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const startDow = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const todayStr = ymd(new Date());
+  const dow = ["S", "M", "T", "W", "T", "F", "S"].map(d => `<div class="cal-dow">${d}</div>`).join("");
+  let cells = "";
+  for (let i = 0; i < startDow; i++) cells += `<div class="cal-cell"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const has = entryDays.has(key);
+    const cls = ["cal-cell", "filled", has ? "has" : "", key === todayStr ? "today" : "", key === dayFilter ? "sel" : ""]
+      .filter(Boolean).join(" ");
+    const click = has ? ` onclick="pickDay('${key}')"` : "";
+    cells += `<div class="${cls}"${click}>${d}</div>`;
+  }
+  return `<div class="insight-card">
+    <div class="cal-head">
+      <button class="btn subtle sm" onclick="calNav(-1)">‹</button>
+      <span class="cal-title">${monthName}</span>
+      <button class="btn subtle sm" onclick="calNav(1)">›</button>
+    </div>
+    <div class="cal-grid">${dow}${cells}</div>
+    <p class="hint" style="margin-top:10px;text-align:center;">Dots mark days you wrote. Tap one to read it.</p>
+  </div>`;
+}
+function calNav(delta) { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + delta, 1); renderInsights(); }
+async function pickDay(key) {
+  dayFilter = key;
+  if (currentRange !== "all") {
+    currentRange = "all";
+    document.querySelectorAll("#filters .chip").forEach(c => c.classList.toggle("on", c.dataset.range === "all"));
+    await loadTimeline();
+  } else {
+    renderTimeline(); renderInsights();
+  }
+  const list = $("timeline-list"); if (list) list.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 // ---------- Edit ----------
 async function editEntry(id) {
   const { data, error } = await sb.from("entries").select("*").eq("id", id).single();
   if (error) { toast("Couldn't open that entry."); return; }
   editingEntry = data; editingId = id;
   switchView("write");
+  // remove draft note if present (we're editing, not drafting)
+  const dn = $("draft-note"); if (dn) dn.remove();
   // fill fields
   const box = $("grat-fields"); box.innerHTML = "";
   const grats = data.gratitude && data.gratitude.length ? data.gratitude : [""];
@@ -759,7 +1439,9 @@ function askDelete(id) {
     const { error } = await sb.from("entries").delete().eq("id", id);
     if (error) { toast("Couldn't delete."); return; }
     toast("Entry deleted.");
-    const el = $("entry-" + id); if (el) { el.style.opacity = 0; setTimeout(() => loadTimeline(), 200); }
+    const el = $("entry-" + id);
+    if (el) { el.style.opacity = 0; setTimeout(() => { loadTimeline(); loadEntryDays(); }, 200); }
+    else { loadTimeline(); loadEntryDays(); }
   };
 }
 
@@ -811,7 +1493,10 @@ function showMemory() {
 }
 function goToEntry(id) {
   currentRange = "all";
+  activeMoodFilter = null; dayFilter = null;
+  if ($("tl-search")) $("tl-search").value = "";
   document.querySelectorAll("#filters .chip").forEach(c => c.classList.toggle("on", c.dataset.range === "all"));
+  document.querySelectorAll("#tl-mood-filter .mf").forEach(x => x.classList.toggle("on", !x.dataset.mood));
   switchView("timeline");
   loadTimeline().then(() => {
     setTimeout(() => {
@@ -832,6 +1517,97 @@ function switchView(name) {
   window.scrollTo({ top: 0 });
   if (name === "timeline") loadTimeline();
   if (name === "comfort") loadComfort();
+  if (name === "breathe") resetBreathing();   // fresh, calm start each visit
+  else stopBreathing();                        // never keep timing in the background
+}
+
+// ======================================================
+//  JUST BREATHE — box breathing guide (4-4-4-4)
+// ======================================================
+const BREATHE_DUR = 4; // seconds per side
+let breatheRunning = false, breatheStep = 0, breatheRemain = BREATHE_DUR, breatheCycle = 0, breatheTick = null;
+const BREATHE_PHASES = [
+  { name: "Breathe in",  corner: 1 },
+  { name: "Hold",        corner: 2 },
+  { name: "Breathe out", corner: 3 },
+  { name: "Hold",        corner: 0 },
+];
+function breatheCorners() {
+  const track = document.querySelector(".breathe-track");
+  const s = (track ? track.clientWidth : 260) - 18; // travel = side minus dot size
+  return [ { x: 0, y: 0 }, { x: s, y: 0 }, { x: s, y: s }, { x: 0, y: s } ];
+}
+function breathePlaceDot(i, animate) {
+  const dot = $("breathe-dot"); if (!dot) return;
+  const c = breatheCorners()[i];
+  dot.style.transition = animate ? "transform 4s linear" : "none";
+  dot.style.transform = `translate(${c.x}px, ${c.y}px)`;
+}
+function breatheStartPhase() {
+  const p = BREATHE_PHASES[breatheStep];
+  const box = $("breathe-box");
+  if ($("breathe-phase")) $("breathe-phase").textContent = p.name;
+  breatheRemain = BREATHE_DUR;
+  if ($("breathe-count")) $("breathe-count").textContent = breatheRemain;
+  if (box) {
+    box.style.transition = "transform 4s ease-in-out";
+    if (p.name === "Breathe in") box.classList.add("big");
+    else if (p.name === "Breathe out") box.classList.remove("big");
+  }
+  breathePlaceDot(p.corner, true);
+}
+function breatheLoop() {
+  breatheRemain -= 1;
+  if (breatheRemain > 0) { if ($("breathe-count")) $("breathe-count").textContent = breatheRemain; return; }
+  breatheStep = (breatheStep + 1) % 4;
+  if (breatheStep === 0) { breatheCycle++; if ($("breathe-cycles")) $("breathe-cycles").textContent = "Cycle " + breatheCycle; }
+  breatheStartPhase();
+}
+function startBreathing() {
+  if (breatheRunning) return;
+  breatheRunning = true;
+  breatheStep = 0; breatheCycle = 0;
+  if ($("breathe-cycles")) $("breathe-cycles").textContent = "Cycle 0";
+  if ($("btn-breathe-start")) $("btn-breathe-start").textContent = "Breathing…";
+  breathePlaceDot(0, false);
+  requestAnimationFrame(breatheStartPhase);
+  breatheTick = setInterval(breatheLoop, 1000);
+}
+function stopBreathing() {
+  clearInterval(breatheTick); breatheRunning = false;
+  if ($("btn-breathe-start")) $("btn-breathe-start").textContent = "Start";
+}
+function resetBreathing() {
+  stopBreathing();
+  breatheStep = 0; breatheRemain = BREATHE_DUR; breatheCycle = 0;
+  const box = $("breathe-box");
+  if (box) { box.style.transition = "transform .6s ease"; box.classList.remove("big"); }
+  breathePlaceDot(0, false);
+  if ($("breathe-phase")) $("breathe-phase").textContent = "Ready when you are";
+  if ($("breathe-count")) $("breathe-count").textContent = "";
+  if ($("breathe-cycles")) $("breathe-cycles").textContent = "Cycle 0";
+}
+function openBreatheInfo() {
+  const ov = document.createElement("div");
+  ov.className = "overlay"; ov.id = "breathe-info-overlay";
+  ov.innerHTML = `<div class="modal">
+      <h3 style="margin:0 0 6px;">Why box breathing helps</h3>
+      <p class="muted" style="margin:0 0 12px;line-height:1.6;">Slow, even breathing gently signals your nervous system that you're safe, easing the body out of "fight or flight" and into calm. A few rounds can:</p>
+      <ul class="grat-list" style="margin-top:0;">
+        <li>Ease stress and anxiety in the moment</li>
+        <li>Slow a racing heart and steady your breath</li>
+        <li>Sharpen focus and clear a busy mind</li>
+        <li>Help you feel more grounded before or after journaling</li>
+        <li>Make it easier to wind down and rest</li>
+      </ul>
+      <p class="hint" style="margin-top:12px;">A simple, portable practice — used by everyone from athletes to first responders to steady themselves under pressure.</p>
+      <div class="row" style="justify-content:flex-end;margin-top:16px;">
+        <button class="btn ghost" id="breathe-info-close">Got it</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
+  $("breathe-info-close").onclick = () => ov.remove();
 }
 
 // ======================================================
@@ -841,15 +1617,63 @@ if (configured) {
   $("btn-magic").onclick = sendMagicLink;
   $("email").addEventListener("keydown", e => { if (e.key === "Enter") sendMagicLink(); });
   $("btn-back").onclick = () => { $("auth-sent").classList.add("hide"); $("auth-form").classList.remove("hide"); };
-  $("btn-logout").onclick = async () => { await sb.auth.signOut(); };
+  if (LOCAL_PREVIEW) {
+    $("btn-logout").textContent = "Reset demo";
+    $("btn-logout").onclick = () => {
+      try { localStorage.removeItem("grateful_preview_entries"); localStorage.removeItem("grateful_preview_media"); } catch (e) {}
+      seedPreviewData();
+      currentRange = "week"; activeMoodFilter = null; dayFilter = null;
+      toast("Preview reset with sample entries 🌿");
+      switchView("write");
+      loadEntryDays();
+    };
+  } else {
+    $("btn-logout").onclick = async () => { saveDraft(); await sb.auth.signOut(); };
+  }
   $("btn-add-field").onclick = () => addGratField();
   $("btn-media").onclick = () => $("media-input").click();
   $("btn-save").onclick = saveEntry;
+  $("notes").addEventListener("input", saveDraftDebounced);
+
+  // Just breathe controls
+  $("btn-breathe-start").onclick = startBreathing;
+  $("btn-breathe-reset").onclick = resetBreathing;
+  $("btn-breathe-info").onclick = openBreatheInfo;
+
   document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => switchView(b.dataset.view));
   document.querySelectorAll("#filters .chip").forEach(c => c.onclick = () => {
     document.querySelectorAll("#filters .chip").forEach(x => x.classList.remove("on"));
-    c.classList.add("on"); currentRange = c.dataset.range; loadTimeline();
+    c.classList.add("on"); currentRange = c.dataset.range;
+    if (dayFilter) dayFilter = null; // range change clears an explicit day pick
+    loadTimeline();
   });
+
+  // Timeline search + mood filter + insights (NEW)
+  buildMoodFilter();
+  $("tl-search").addEventListener("input", renderTimeline);
+  $("btn-insights").onclick = () => {
+    const p = $("insights");
+    p.classList.toggle("hide");
+    const open = !p.classList.contains("hide");
+    $("btn-insights").textContent = open ? "Hide insights ▴" : "Show insights ▾";
+    if (open) renderInsights();
+  };
+
+  // Arrow-key navigation for the timeline carousel (NEW)
+  document.addEventListener("keydown", (e) => {
+    if (!carouselMove) return;
+    const tv = $("view-timeline");
+    if (!tv || tv.classList.contains("hide")) return;
+    const t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+    if (e.key === "ArrowLeft") { carouselMove(-1); e.preventDefault(); }
+    else if (e.key === "ArrowRight") { carouselMove(1); e.preventDefault(); }
+  });
+
+  // Protect drafts against refresh / tab close (NEW)
+  window.addEventListener("beforeunload", saveDraft);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveDraft(); });
+
   initAuth();
 }
 </script>
