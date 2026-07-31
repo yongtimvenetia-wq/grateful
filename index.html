@@ -169,9 +169,11 @@
   .filters::-webkit-scrollbar { display: none; }
   .chip {
     white-space: nowrap; padding: 8px 15px; border-radius: 999px; font-size: 14px; font-weight: 600;
-    background: var(--card); color: var(--ink-soft); border: 1px solid var(--line); transition: all .15s;
+    background: var(--card); color: var(--ink-soft); border: 1px solid var(--line); transition: transform .15s, box-shadow .2s, background .15s, color .15s;
   }
+  .chip:hover { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--lav); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(138,164,214,.25); }
   .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 4px 12px rgba(138,164,214,.4); }
+  .chip.on:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(138,164,214,.5); }
 
   /* ---------- Timeline search + mood filter + insights (NEW) ---------- */
   .tl-tools { margin-top: 14px; }
