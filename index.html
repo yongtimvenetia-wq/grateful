@@ -1595,6 +1595,10 @@ function breatheStartPhase() {
     else if (p.name === "Breathe out") box.classList.remove("big");
   }
   breathePlaceDot(p.corner, true);
+  if (navigator.vibrate) {
+    if (p.name === "Breathe in" || p.name === "Breathe out") navigator.vibrate([120, 60, 120]);
+    else navigator.vibrate(60);
+  }
 }
 function breatheLoop() {
   breatheRemain -= 1;
