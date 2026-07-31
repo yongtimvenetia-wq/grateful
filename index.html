@@ -126,8 +126,9 @@
     font-size: 14px; font-weight: 500; border: 1px solid transparent; transition: all .15s;
     display:flex; align-items:center; gap:7px;
   }
-  .mood:hover { border-color: var(--lav); background: var(--accent-soft); color: var(--accent-deep); transform: translateY(-1px); }
-  .mood.on { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--lav); font-weight: 600; }
+  .mood:hover { border-color: var(--lav); background: var(--accent-soft); color: var(--accent-deep); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(138,164,214,.25); }
+  .mood.on { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--lav); font-weight: 600; box-shadow: 0 4px 12px rgba(138,164,214,.3); }
+  .mood.on:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(138,164,214,.4); }
   .mood .em { font-size: 15px; }
 
   /* draft-restored banner */
