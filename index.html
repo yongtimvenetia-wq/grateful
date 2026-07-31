@@ -348,9 +348,9 @@
 
   /* ---------- Just breathe (box breathing) ---------- */
   .breathe-card {
-    background: linear-gradient(160deg, #1a2240 0%, #0f1628 60%, #1c1a36 100%);
-    border-radius: var(--radius); padding: 36px 24px 32px; text-align: center;
-    box-shadow: 0 24px 64px rgba(15,22,40,.45);
+    background: linear-gradient(160deg, #dce8f8 0%, #d4d8f4 55%, #ddd6f3 100%);
+    border: 1px solid var(--lav); border-radius: var(--radius); padding: 36px 24px 32px; text-align: center;
+    box-shadow: 0 8px 32px rgba(138,164,214,.18);
   }
   .breathe-wrap { text-align: center; }
   .breathe-stage {
@@ -359,33 +359,33 @@
   }
   .breathe-track {
     position: absolute; inset: 0; border-radius: 28px;
-    border: 1.5px solid rgba(138,164,214,.25);
-    box-shadow: inset 0 0 32px rgba(138,164,214,.06), 0 0 0 1px rgba(255,255,255,.04);
+    border: 1.5px solid rgba(111,139,199,.3);
+    box-shadow: inset 0 0 24px rgba(138,164,214,.1);
   }
   .breathe-box {
     width: 110px; height: 110px; border-radius: 50%;
-    background: radial-gradient(circle at 38% 32%, rgba(255,255,255,.55) 0%, var(--accent) 45%, #4a6abf 100%);
-    box-shadow: 0 0 0 14px rgba(138,164,214,.12), 0 0 48px rgba(138,164,214,.35), 0 12px 32px rgba(15,22,40,.5);
+    background: radial-gradient(circle at 36% 30%, rgba(255,255,255,.9) 0%, var(--accent) 55%, var(--accent-deep) 100%);
+    box-shadow: 0 0 0 14px rgba(138,164,214,.15), 0 0 40px rgba(138,164,214,.3), 0 8px 24px rgba(111,139,199,.25);
     transform: scale(.52); transition: transform 4s ease-in-out;
   }
   .breathe-box.big {
     transform: scale(1);
-    box-shadow: 0 0 0 22px rgba(138,164,214,.10), 0 0 80px rgba(138,164,214,.45), 0 16px 48px rgba(15,22,40,.5);
+    box-shadow: 0 0 0 22px rgba(138,164,214,.12), 0 0 64px rgba(138,164,214,.38), 0 12px 32px rgba(111,139,199,.2);
   }
   .breathe-dot {
     position: absolute; width: 14px; height: 14px; border-radius: 50%;
-    background: #fff; box-shadow: 0 0 0 4px rgba(255,255,255,.2), 0 0 12px rgba(255,255,255,.6);
+    background: var(--accent-deep); box-shadow: 0 0 0 4px rgba(111,139,199,.25), 0 0 10px rgba(111,139,199,.4);
     top: -7px; left: -7px; transition: transform 4s linear;
   }
-  .breathe-phase { font-family: var(--serif); font-size: 22px; color: rgba(255,255,255,.9); margin-top: 20px; min-height: 28px; letter-spacing: .01em; }
-  .breathe-count { font-size: 52px; font-weight: 300; color: #fff; min-height: 60px; line-height: 1; letter-spacing: -.02em; margin-top: 4px; }
-  .breathe-cycles { color: rgba(255,255,255,.35); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; }
+  .breathe-phase { font-family: var(--serif); font-size: 22px; color: var(--accent-deep); margin-top: 20px; min-height: 28px; letter-spacing: .01em; }
+  .breathe-count { font-size: 52px; font-weight: 300; color: var(--ink); min-height: 60px; line-height: 1; letter-spacing: -.02em; margin-top: 4px; }
+  .breathe-cycles { color: var(--ink-faint); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; }
   .breathe-controls { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
-  .breathe-controls .btn { background: rgba(138,164,214,.18); color: #fff; box-shadow: none; border: 1px solid rgba(138,164,214,.3); backdrop-filter: blur(6px); }
-  .breathe-controls .btn:hover { background: rgba(138,164,214,.32); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15,22,40,.4); }
-  .breathe-controls .btn.ghost { background: rgba(255,255,255,.07); color: rgba(255,255,255,.6); border-color: rgba(255,255,255,.12); }
-  .breathe-controls .btn.ghost:hover { background: rgba(255,255,255,.14); color: #fff; }
-  .breathe-hint { color: rgba(255,255,255,.3); font-size: 13px; line-height: 1.6; margin-top: 20px; }
+  .breathe-controls .btn { background: var(--accent); color: #fff; box-shadow: 0 4px 16px rgba(138,164,214,.4); border: none; }
+  .breathe-controls .btn:hover { background: var(--accent-deep); transform: translateY(-2px); box-shadow: 0 8px 22px rgba(138,164,214,.45); }
+  .breathe-controls .btn.ghost { background: rgba(255,255,255,.55); color: var(--accent-deep); box-shadow: none; border: 1px solid rgba(111,139,199,.25); }
+  .breathe-controls .btn.ghost:hover { background: rgba(255,255,255,.8); transform: translateY(-1px); }
+  .breathe-hint { color: var(--ink-faint); font-size: 13px; line-height: 1.6; margin-top: 20px; }
 
   @media (max-width: 520px) {
     h1.big { font-size: 26px; }
