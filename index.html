@@ -243,9 +243,16 @@
     background: var(--lav);
   }
   .e-notes { margin-top: 12px; color: var(--ink-soft); font-style: italic; font-size: 15px; }
-  .e-media { margin: 14px -20px 0; overflow: hidden; }
-  .e-media img, .e-media video { width: 100%; display: block; }
+  .e-media { margin: 12px -20px -20px; overflow: hidden; }
+  .e-media img { width: 100%; display: block; max-height: 260px; object-fit: cover; cursor: zoom-in; transition: opacity .15s; }
+  .e-media img:hover { opacity: .9; }
+  .e-media video { width: 100%; display: block; }
   .e-actions { margin-top: 12px; display: flex; gap: 6px; justify-content: flex-end; }
+  /* Lightbox */
+  .lb-overlay { position: fixed; inset: 0; background: rgba(10,12,20,.88); display: grid; place-items: center; z-index: 200; cursor: zoom-out; animation: fade .2s ease; }
+  .lb-overlay img { max-width: 96vw; max-height: 92vh; border-radius: 10px; object-fit: contain; box-shadow: 0 8px 48px rgba(0,0,0,.6); }
+  .lb-close { position: fixed; top: 18px; right: 22px; background: rgba(255,255,255,.15); border: none; color: #fff; font-size: 22px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; transition: background .15s; }
+  .lb-close:hover { background: rgba(255,255,255,.28); }
 
   /* ---------- Timeline carousel ---------- */
   .carousel { position: relative; margin-top: 16px; }
@@ -755,6 +762,14 @@ function fmtShort(d) {
   return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 function esc(s) { const d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+function openLightbox(src) {
+  const ov = document.createElement("div");
+  ov.className = "lb-overlay";
+  ov.innerHTML = `<button class="lb-close" aria-label="Close">✕</button><img src="${src}">`;
+  ov.onclick = () => ov.remove();
+  document.body.appendChild(ov);
+  document.addEventListener("keydown", function onKey(e) { if (e.key === "Escape") { ov.remove(); document.removeEventListener("keydown", onKey); } });
+}
 function greetingWord() {
   const h = new Date().getHours();
   if (h < 12) return "Good morning";
@@ -1278,7 +1293,7 @@ function renderEntry(e) {
   const media = e.media_url
     ? `<div class="e-media">${e.media_type === "video"
         ? `<video src="${esc(e.media_url)}" controls playsinline></video>`
-        : `<img src="${esc(e.media_url)}" loading="lazy">`}</div>`
+        : `<img src="${esc(e.media_url)}" loading="lazy" onclick="openLightbox(this.src)" title="Tap to expand">`}</div>`
     : "";
   const mood = e.mood ? `<span class="e-mood">${moodEm(e.mood)} ${esc(e.mood)}</span>` : "";
   const notes = e.notes ? `<div class="e-notes">"${esc(e.notes)}"</div>` : "";
@@ -1290,11 +1305,11 @@ function renderEntry(e) {
       </div>
       ${grats ? `<ul class="grat-list">${grats}</ul>` : ""}
       ${notes}
-      ${media}
       <div class="e-actions">
         <button class="btn subtle sm" onclick='editEntry(${JSON.stringify(e.id)})'>Edit</button>
         <button class="btn danger sm" onclick='askDelete(${JSON.stringify(e.id)})'>Delete</button>
       </div>
+      ${media}
     </article>`;
 }
 
