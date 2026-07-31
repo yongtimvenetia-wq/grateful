@@ -358,9 +358,7 @@
     margin: 24px auto 8px; display: grid; place-items: center;
   }
   .breathe-track {
-    position: absolute; inset: 0; border-radius: 10px;
-    border: 2px solid rgba(111,139,199,.4);
-    box-shadow: inset 0 0 24px rgba(138,164,214,.1);
+    position: absolute; inset: 0;
   }
   .breathe-box {
     width: 110px; height: 110px; border-radius: 50%;
@@ -372,11 +370,7 @@
     transform: scale(1);
     box-shadow: 0 0 0 22px rgba(138,164,214,.12), 0 0 64px rgba(138,164,214,.38), 0 12px 32px rgba(111,139,199,.2);
   }
-  .breathe-dot {
-    position: absolute; width: 18px; height: 18px; border-radius: 50%;
-    background: var(--accent-deep); box-shadow: 0 0 0 5px rgba(111,139,199,.2), 0 0 12px rgba(111,139,199,.4);
-    top: -9px; left: -9px; transition: transform 4s linear;
-  }
+  .breathe-dot { display: none; }
   .breathe-phase { font-family: var(--serif); font-size: 22px; color: var(--accent-deep); margin-top: 20px; min-height: 28px; letter-spacing: .01em; }
   .breathe-count { font-size: 52px; font-weight: 300; color: var(--ink); min-height: 60px; line-height: 1; letter-spacing: -.02em; margin-top: 4px; }
   .breathe-cycles { color: var(--ink-faint); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; }
