@@ -358,8 +358,8 @@
     margin: 24px auto 8px; display: grid; place-items: center;
   }
   .breathe-track {
-    position: absolute; inset: 0; border-radius: 28px;
-    border: 1.5px solid rgba(111,139,199,.3);
+    position: absolute; inset: 0; border-radius: 10px;
+    border: 2px solid rgba(111,139,199,.4);
     box-shadow: inset 0 0 24px rgba(138,164,214,.1);
   }
   .breathe-box {
@@ -541,6 +541,7 @@
           <div class="breathe-controls">
             <button class="btn" id="btn-breathe-start">Start</button>
             <button class="btn ghost" id="btn-breathe-reset">Reset</button>
+            <button class="btn ghost" id="btn-breathe-mute" title="Toggle voice guidance">🔊</button>
           </div>
           <p class="breathe-hint">Follow the dot around the square. Breathe in as it grows, hold, breathe out as it shrinks, hold.</p>
         </div>
@@ -1572,6 +1573,31 @@ function switchView(name) {
 // ======================================================
 const BREATHE_DUR = 4; // seconds per side
 let breatheRunning = false, breatheStep = 0, breatheRemain = BREATHE_DUR, breatheCycle = 0, breatheTick = null;
+let breatheMuted = false;
+let breatheVoice = null;
+function loadBreatheVoice() {
+  if (!window.speechSynthesis) return;
+  const pick = () => {
+    const voices = speechSynthesis.getVoices();
+    breatheVoice = voices.find(v => /daniel|oliver|arthur|george/i.test(v.name) && v.lang.startsWith("en"))
+      || voices.find(v => v.lang === "en-GB")
+      || voices.find(v => v.lang.startsWith("en"))
+      || null;
+  };
+  pick();
+  speechSynthesis.onvoiceschanged = pick;
+}
+loadBreatheVoice();
+function breatheSpeak(text) {
+  if (breatheMuted || !window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-GB";
+  u.rate = 0.82;
+  u.pitch = 0.85;
+  if (breatheVoice) u.voice = breatheVoice;
+  speechSynthesis.speak(u);
+}
 const BREATHE_PHASES = [
   { name: "Breathe in",  corner: 1 },
   { name: "Hold",        corner: 2 },
@@ -1601,6 +1627,7 @@ function breatheStartPhase() {
     else if (p.name === "Breathe out") box.classList.remove("big");
   }
   breathePlaceDot(p.corner, true);
+  breatheSpeak(p.name);
 }
 function breatheLoop() {
   breatheRemain -= 1;
@@ -1688,6 +1715,11 @@ if (configured) {
   $("btn-breathe-start").onclick = startBreathing;
   $("btn-breathe-reset").onclick = resetBreathing;
   $("btn-breathe-info").onclick = openBreatheInfo;
+  $("btn-breathe-mute").onclick = () => {
+    breatheMuted = !breatheMuted;
+    if (breatheMuted) speechSynthesis.cancel();
+    $("btn-breathe-mute").textContent = breatheMuted ? "🔇" : "🔊";
+  };
 
   document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => switchView(b.dataset.view));
   document.querySelectorAll("#filters .chip").forEach(c => c.onclick = () => {
