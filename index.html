@@ -893,6 +893,8 @@ function buildWriteForm() {
     };
     mb.appendChild(b);
   });
+  // clear notes before restoring draft so stale text never carries over
+  if ($("notes")) $("notes").value = "";
   // restore any unsaved draft (only for a fresh, non-editing form)
   restoreDraft();
 }
