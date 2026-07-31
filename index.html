@@ -243,7 +243,8 @@
     background: var(--lav);
   }
   .e-notes { margin-top: 12px; color: var(--ink-soft); font-style: italic; font-size: 15px; }
-  .e-media { margin: 12px -20px -20px; overflow: hidden; }
+  .entry.has-media { padding-bottom: 0; }
+  .e-media { margin: 12px -20px 0; overflow: hidden; }
   .e-media img { width: 100%; display: block; max-height: 260px; object-fit: cover; cursor: zoom-in; transition: opacity .15s; }
   .e-media img:hover { opacity: .9; }
   .e-media video { width: 100%; display: block; }
@@ -1298,7 +1299,7 @@ function renderEntry(e) {
   const mood = e.mood ? `<span class="e-mood">${moodEm(e.mood)} ${esc(e.mood)}</span>` : "";
   const notes = e.notes ? `<div class="e-notes">"${esc(e.notes)}"</div>` : "";
   return `
-    <article class="entry" id="entry-${e.id}">
+    <article class="entry${e.media_url ? ' has-media' : ''}" id="entry-${e.id}">
       <div class="row between">
         <span class="e-date">${fmtShort(e.created_at)}</span>
         ${mood}
