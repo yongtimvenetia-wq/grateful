@@ -122,14 +122,79 @@
   /* mood chips */
   .moods { display: flex; flex-wrap: wrap; gap: 8px; }
   .mood {
+    position: relative; overflow: visible;
     padding: 9px 15px; border-radius: 999px; background: var(--bg-soft); color: var(--ink-soft);
-    font-size: 14px; font-weight: 500; border: 1px solid transparent; transition: all .15s;
+    font-size: 14px; font-weight: 500; border: 1px solid transparent;
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), background .15s, color .15s, border-color .15s, box-shadow .18s;
     display:flex; align-items:center; gap:7px;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   }
   .mood:hover { border-color: var(--lav); background: var(--accent-soft); color: var(--accent-deep); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(138,164,214,.25); }
+  .mood:active { transform: scale(.94); }
   .mood.on { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--lav); font-weight: 600; box-shadow: 0 4px 12px rgba(138,164,214,.3); }
   .mood.on:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(138,164,214,.4); }
-  .mood .em { font-size: 15px; }
+  .mood .em { display:inline-flex; align-items:center; transform-origin: 50% 60%; }
+
+  /* refined mood line-icons — inherit text color, tint on select */
+  .micon { width: 20px; height: 20px; display: inline-block; vertical-align: middle;
+    fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    transition: opacity .15s; }
+  .mood .micon, .mf .micon { width: 20px; height: 20px; }
+  .e-mood .micon { width: 16px; height: 16px; margin-right: 5px; }
+
+  /* per-mood signature colors — the pop of color, always visible */
+  .m-appreciated { color: #5aa15a; }
+  .m-loved       { color: #db6f96; }
+  .m-good        { color: #e0a13f; }
+  .m-okay        { color: #6f93d6; }
+  .m-overwhelmed { color: #3f9fae; }
+  .m-sad         { color: #7b86c6; }
+
+  /* selected chip tints to a soft wash of the same hue (entry form + timeline) */
+  .mood[data-mood="Appreciated"].on, .mf[data-mood="Appreciated"].on { background:#eaf4e9; border-color:#9fca9f; color:#3f7a3f; }
+  .mood[data-mood="Loved"].on,       .mf[data-mood="Loved"].on       { background:#fbecf1; border-color:#eaa8c0; color:#b14d74; }
+  .mood[data-mood="Good"].on,        .mf[data-mood="Good"].on        { background:#fbf1df; border-color:#eecb92; color:#b57d24; }
+  .mood[data-mood="Okay"].on,        .mf[data-mood="Okay"].on        { background:#e9eefb; border-color:#a9c0ea; color:#3f5a94; }
+  .mood[data-mood="Overwhelmed"].on, .mf[data-mood="Overwhelmed"].on { background:#e2f1f3; border-color:#93cdd6; color:#2f7d8a; }
+  .mood[data-mood="Sad"].on,         .mf[data-mood="Sad"].on         { background:#ececf8; border-color:#b3bbe4; color:#565f9e; }
+
+  /* --- subtle & calm: gentle scale-up + soft glow pulse on select --- */
+  /* shared by the entry-form mood chips (.mood) and timeline mood filter (.mf) */
+  .mood.pop, .mf.pop { animation: moodPop .34s cubic-bezier(.25,.9,.4,1); }
+  .mood.pop .em, .mf.pop span { animation: moodEmoji .34s cubic-bezier(.25,.9,.4,1); }
+  @keyframes moodPop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  @keyframes moodEmoji {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+  /* soft glow that fades in and out, no expanding ring */
+  .mood .ripple, .mf .ripple {
+    position: absolute; left: 50%; top: 50%; width: 100%; height: 100%;
+    border-radius: 999px; pointer-events: none;
+    transform: translate(-50%,-50%) scale(1);
+    background: radial-gradient(circle, rgba(138,164,214,.22) 0%, rgba(138,164,214,0) 72%);
+    opacity: 0; animation: moodGlow .5s ease-out forwards;
+  }
+  @keyframes moodGlow {
+    0%   { opacity: 0;   transform: translate(-50%,-50%) scale(1); }
+    35%  { opacity: .85; transform: translate(-50%,-50%) scale(1.25); }
+    100% { opacity: 0;   transform: translate(-50%,-50%) scale(1.35); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mf { transition: background .15s, color .15s, border-color .15s; }
+    .mf.pop, .mf.pop span { animation: none; }
+    .mf .ripple { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mood, .mood .em { transition: background .15s, color .15s, border-color .15s; }
+    .mood.pop, .mood.pop .em { animation: none; }
+    .mood .ripple { display: none; }
+  }
 
   /* draft-restored banner */
   .draft-note {
@@ -147,6 +212,21 @@
   .faint { color: var(--ink-faint); font-size: 13px; }
   h1.big { font-family: var(--serif); font-weight: 500; font-size: 30px; letter-spacing: .2px; margin: 6px 0 2px; }
   .sub { color: var(--ink-soft); margin-top: 0; }
+
+  /* daily rotating quote — centered soft header accent under the greeting */
+  .daily-quote {
+    margin: 14px auto 2px; padding: 0; max-width: 30rem;
+    font-family: var(--serif); font-style: italic; font-size: 15.5px; line-height: 1.55;
+    color: var(--ink-soft); text-align: center;
+    opacity: 0; animation: quoteIn .6s ease .05s forwards;
+  }
+  .daily-quote .qa {
+    display: block; margin-top: 6px;
+    font-family: inherit; font-style: normal; font-weight: 600; font-size: 13px;
+    letter-spacing: .2px; color: var(--accent-deep);
+  }
+  @keyframes quoteIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .daily-quote { animation: none; opacity: 1; } }
   .hide { display: none !important; }
   .center { text-align: center; }
 
@@ -186,11 +266,16 @@
   #tl-search { padding-left: 42px; }
   .moodfilter { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
   .mf {
+    position: relative; overflow: visible;
     padding: 7px 13px; border-radius: 999px; background: var(--card); color: var(--ink-soft);
     border: 1px solid var(--line); font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; gap: 6px; transition: all .15s;
+    display: flex; align-items: center; gap: 6px;
+    transition: transform .18s cubic-bezier(.25,.9,.4,1), background .15s, color .15s, border-color .15s, box-shadow .18s;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   }
+  .mf span { display: inline-block; transform-origin: 50% 80%; }
   .mf:hover { border-color: var(--lav); }
+  .mf:active { transform: scale(.96); }
   .mf.on { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--lav); }
   .dayfilter-pill {
     display: inline-flex; align-items: center; gap: 8px; margin-top: 12px;
@@ -438,6 +523,7 @@
       <div style="padding:22px 0 6px;">
         <h1 class="big" id="greeting">Today</h1>
         <p class="sub" id="today-date"></p>
+        <blockquote class="daily-quote" id="daily-quote"></blockquote>
       </div>
       <div class="card stack">
         <div>
@@ -729,13 +815,23 @@ function seedPreviewData() {
 }
 
 // ---------- Constants ----------
+// Refined single-stroke line icons (inherit currentColor so they tint with the chip).
+// `em` is kept only for the decorative timeline-stat lines.
+const MOOD_ICONS = {
+  Appreciated: '<svg class="micon m-appreciated" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-7 5-12 14-12 0 7-5 12-14 12Z"/><path d="M5 19c3-4.5 6.5-7 10-8.5"/></svg>',
+  Loved:       '<svg class="micon m-loved" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20C12 20 4 15 4 9.4A3.5 3.5 0 0 1 12 7 3.5 3.5 0 0 1 20 9.4C20 15 12 20 12 20Z"/></svg>',
+  Good:        '<svg class="micon m-good" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.6" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.4" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M7.6 13.4a4.8 4.8 0 0 0 8.8 0"/></svg>',
+  Okay:        '<svg class="micon m-okay" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.6" cy="10.2" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="10.2" r="1.1" fill="currentColor" stroke="none"/><path d="M8.4 14.4h7.2"/></svg>',
+  Overwhelmed: '<svg class="micon m-overwhelmed" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.6" cy="10.2" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="10.2" r="1.1" fill="currentColor" stroke="none"/><path d="M8 14.6c1-1.1 2-1.1 3 0s2 1.1 3 0"/></svg>',
+  Sad:         '<svg class="micon m-sad" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.6" cy="10.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="10.4" r="1.1" fill="currentColor" stroke="none"/><path d="M7.8 15.4a4.6 4.6 0 0 1 8.4 0"/></svg>',
+};
 const MOODS = [
-  { key: "Appreciated", em: "🌿" },
-  { key: "Loved",       em: "💗" },
-  { key: "Good",        em: "🙂" },
-  { key: "Okay",        em: "😌" },
-  { key: "Overwhelmed", em: "🌊" },
-  { key: "Sad",         em: "🌧️" },
+  { key: "Appreciated", em: "🌿", icon: MOOD_ICONS.Appreciated },
+  { key: "Loved",       em: "💗", icon: MOOD_ICONS.Loved },
+  { key: "Good",        em: "🙂", icon: MOOD_ICONS.Good },
+  { key: "Okay",        em: "😌", icon: MOOD_ICONS.Okay },
+  { key: "Overwhelmed", em: "🌊", icon: MOOD_ICONS.Overwhelmed },
+  { key: "Sad",         em: "🌧️", icon: MOOD_ICONS.Sad },
 ];
 // Moods considered "positive" for the Feeling-down feature
 const POSITIVE_MOODS = ["Appreciated", "Loved", "Good"];
@@ -791,6 +887,45 @@ function greetingWord() {
   if (h < 12) return "Good morning";
   if (h < 18) return "Good afternoon";
   return "Good evening";
+}
+
+// Short, uplifting lines — a fresh one appears on every load/refresh.
+const QUOTES = [
+  { t: "Gratitude turns what we have into enough.", a: "Melody Beattie" },
+  { t: "Happiness is not something ready made. It comes from your own actions.", a: "Dalai Lama" },
+  { t: "Keep your face always toward the sunshine — and shadows will fall behind you.", a: "Walt Whitman" },
+  { t: "In the middle of difficulty lies opportunity.", a: "Albert Einstein" },
+  { t: "Act as if what you do makes a difference. It does.", a: "William James" },
+  { t: "Start where you are. Use what you have. Do what you can.", a: "Arthur Ashe" },
+  { t: "Wherever you go, go with all your heart.", a: "Confucius" },
+  { t: "Very little is needed to make a happy life.", a: "Marcus Aurelius" },
+  { t: "Let us be grateful to the people who make us happy.", a: "Marcel Proust" },
+  { t: "Joy is the simplest form of gratitude.", a: "Karl Barth" },
+  { t: "It always seems impossible until it's done.", a: "Nelson Mandela" },
+  { t: "Believe you can and you're halfway there.", a: "Theodore Roosevelt" },
+  { t: "Turn your wounds into wisdom.", a: "Oprah Winfrey" },
+  { t: "Optimism is the faith that leads to achievement.", a: "Helen Keller" },
+  { t: "The purpose of our lives is to be happy.", a: "Dalai Lama" },
+  { t: "No act of kindness, no matter how small, is ever wasted.", a: "Aesop" },
+  { t: "Where there is love there is life.", a: "Mahatma Gandhi" },
+  { t: "The future belongs to those who believe in the beauty of their dreams.", a: "Eleanor Roosevelt" },
+  { t: "Positive anything is better than negative nothing.", a: "Elbert Hubbard" },
+  { t: "Every day may not be good, but there is something good in every day.", a: "Alice Morse Earle" },
+  { t: "When I started counting my blessings, my whole life turned around.", a: "Willie Nelson" },
+  { t: "Kindness is a language which the deaf can hear and the blind can see.", a: "Mark Twain" },
+  { t: "Happiness depends upon ourselves.", a: "Aristotle" },
+  { t: "What we think, we become.", a: "Buddha" },
+  { t: "Count your life by smiles, not tears.", a: "John Lennon" },
+];
+let lastQuoteIdx = -1;
+function setDailyQuote() {
+  const el = $("daily-quote"); if (!el) return;
+  let i = Math.floor(Math.random() * QUOTES.length);
+  if (QUOTES.length > 1 && i === lastQuoteIdx) i = (i + 1) % QUOTES.length; // avoid immediate repeat
+  lastQuoteIdx = i;
+  const q = QUOTES[i];
+  el.innerHTML = `“${esc(q.t)}”<span class="qa">— ${esc(q.a)}</span>`;
+  el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; // replay fade-in on refresh
 }
 function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function ymd(d) {
@@ -905,6 +1040,7 @@ function restoreDraft() {
 function buildWriteForm() {
   $("today-date").textContent = fmtDate(new Date());
   $("greeting").textContent = greetingWord();
+  setDailyQuote();
   // remove any leftover draft note
   const dn = $("draft-note"); if (dn) dn.remove();
   // gratitude fields (start with 3)
@@ -916,13 +1052,14 @@ function buildWriteForm() {
   MOODS.forEach(m => {
     const b = document.createElement("button");
     b.className = "mood"; b.dataset.mood = m.key;
-    b.innerHTML = `<span class="em">${m.em}</span>${m.key}`;
+    b.innerHTML = `<span class="em">${m.icon}</span>${m.key}`;
     b.onclick = () => {
       if (currentMood === m.key) { currentMood = null; b.classList.remove("on"); }
       else {
         currentMood = m.key;
         document.querySelectorAll("#moods .mood").forEach(x => x.classList.remove("on"));
         b.classList.add("on");
+        moodBurst(b);   // playful pop + glow ripple on select
       }
       saveDraft();
     };
@@ -1275,6 +1412,17 @@ function wireCarousel(n) {
   carouselMove = move; // expose to keyboard handler
 }
 
+// subtle pop + glow when a mood chip is selected (shared: entry form + timeline)
+function moodBurst(btn) {
+  btn.classList.remove("pop");
+  void btn.offsetWidth;            // restart the animation if re-clicked quickly
+  btn.classList.add("pop");
+  const r = document.createElement("span");
+  r.className = "ripple";
+  btn.appendChild(r);
+  setTimeout(() => { btn.classList.remove("pop"); r.remove(); }, 550);
+}
+
 function buildMoodFilter() {
   const box = $("tl-mood-filter"); if (!box || box.dataset.built) return;
   box.dataset.built = "1";
@@ -1287,12 +1435,13 @@ function buildMoodFilter() {
       activeMoodFilter = key;
       document.querySelectorAll("#tl-mood-filter .mf")
         .forEach(x => x.classList.toggle("on", (x.dataset.mood || null) === key));
+      moodBurst(b);
       renderTimeline();
     };
     return b;
   };
   box.appendChild(mk("All moods", null, ""));
-  MOODS.forEach(m => box.appendChild(mk(m.key, m.key, m.em)));
+  MOODS.forEach(m => box.appendChild(mk(m.key, m.key, m.icon)));
 }
 
 function renderDayPill() {
@@ -1303,6 +1452,7 @@ function renderDayPill() {
 function clearDayFilter() { dayFilter = null; renderTimeline(); renderInsights(); }
 
 function moodEm(key) { const m = MOODS.find(x => x.key === key); return m ? m.em : ""; }
+function moodIcon(key) { const m = MOODS.find(x => x.key === key); return m ? m.icon : ""; }
 
 function renderEntry(e) {
   const grats = (e.gratitude || []).map(g => `<li>${esc(g)}</li>`).join("");
@@ -1311,7 +1461,7 @@ function renderEntry(e) {
         ? `<video src="${esc(e.media_url)}" controls playsinline></video>`
         : `<img src="${esc(e.media_url)}" loading="lazy" onclick="openLightbox(this.src)" title="Tap to expand">`}</div>`
     : "";
-  const mood = e.mood ? `<span class="e-mood">${moodEm(e.mood)} ${esc(e.mood)}</span>` : "";
+  const mood = e.mood ? `<span class="e-mood">${moodIcon(e.mood)}${esc(e.mood)}</span>` : "";
   const notes = e.notes ? `<div class="e-notes">"${esc(e.notes)}"</div>` : "";
   return `
     <article class="entry${e.media_url ? ' has-media' : ''}" id="entry-${e.id}">
@@ -1508,13 +1658,50 @@ async function loadComfort() {
     area.innerHTML = `<div class="empty"><div class="big-em">🌤️</div><p>Once you've written a few entries,<br>gentle memories will appear here when you need them.</p></div>`;
     return;
   }
+  buildMemoryQueue();
   showMemory();
+}
+
+// Order the pool so consecutive memories come from DIFFERENT days.
+// We group moments by day, shuffle within each day and shuffle the day
+// order, then round-robin across days. That spreads dates as far apart
+// as possible instead of clustering on whatever period has the most entries.
+let memoryQueue = [];
+let lastMemLead = null;
+function buildMemoryQueue() {
+  const byDay = {};
+  memoryPool.forEach(m => {
+    const day = (m.date || "").slice(0, 10);
+    (byDay[day] = byDay[day] || []).push(m);
+  });
+  const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+  const days = shuffle(Object.keys(byDay));
+  days.forEach(d => shuffle(byDay[d]));
+  const queue = [];
+  const idx = {};
+  let added = true;
+  while (added) {
+    added = false;
+    for (const d of days) {
+      const arr = byDay[d];
+      const i = idx[d] || 0;
+      if (i < arr.length) { queue.push(arr[i]); idx[d] = i + 1; added = true; }
+    }
+  }
+  memoryQueue = queue;
 }
 
 function showMemory() {
   const area = $("comfort-area");
-  const m = memoryPool[Math.floor(Math.random() * memoryPool.length)];
-  const lead = MEMORY_LINES[Math.floor(Math.random() * MEMORY_LINES.length)];
+  if (!memoryQueue.length) buildMemoryQueue();   // reshuffle once we've seen them all
+  const m = memoryQueue.shift();
+  if (!m) return;
+  // pick a lead line, but don't repeat the same one twice in a row
+  let lead = MEMORY_LINES[Math.floor(Math.random() * MEMORY_LINES.length)];
+  if (MEMORY_LINES.length > 1) {
+    while (lead === lastMemLead) lead = MEMORY_LINES[Math.floor(Math.random() * MEMORY_LINES.length)];
+  }
+  lastMemLead = lead;
   const media = m.media_url
     ? `<div class="m-media">${m.media_type === "video"
         ? `<video src="${esc(m.media_url)}" controls playsinline></video>`
