@@ -226,6 +226,14 @@
     letter-spacing: .2px; color: var(--accent-deep);
   }
   @keyframes quoteIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  @keyframes quoteOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px); } }
+  .daily-quote.fading { animation: quoteOut .3s ease forwards; }
+  .quote-next-btn {
+    background: none; border: none; font-family: var(--font, inherit); font-size: 12px;
+    color: var(--ink-faint); cursor: pointer; padding: 4px 8px; border-radius: 20px;
+    letter-spacing: .03em; transition: color .15s, background .15s;
+  }
+  .quote-next-btn:hover { color: var(--accent-deep); background: var(--accent-soft); }
   @media (prefers-reduced-motion: reduce) { .daily-quote { animation: none; opacity: 1; } }
   .hide { display: none !important; }
   .center { text-align: center; }
@@ -524,6 +532,9 @@
         <h1 class="big" id="greeting">Today</h1>
         <p class="sub" id="today-date"></p>
         <blockquote class="daily-quote" id="daily-quote"></blockquote>
+        <div style="text-align:center;margin-top:10px;">
+          <button class="quote-next-btn" id="btn-next-quote" title="Next quote">&#8594; another</button>
+        </div>
       </div>
       <div class="card stack">
         <div>
@@ -918,14 +929,23 @@ const QUOTES = [
   { t: "Count your life by smiles, not tears.", a: "John Lennon" },
 ];
 let lastQuoteIdx = -1;
-function setDailyQuote() {
-  const el = $("daily-quote"); if (!el) return;
+function setDailyQuote(fade) {
+  const el = $(“daily-quote”); if (!el) return;
   let i = Math.floor(Math.random() * QUOTES.length);
-  if (QUOTES.length > 1 && i === lastQuoteIdx) i = (i + 1) % QUOTES.length; // avoid immediate repeat
+  if (QUOTES.length > 1 && i === lastQuoteIdx) i = (i + 1) % QUOTES.length;
   lastQuoteIdx = i;
   const q = QUOTES[i];
-  el.innerHTML = `“${esc(q.t)}”<span class="qa">— ${esc(q.a)}</span>`;
-  el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; // replay fade-in on refresh
+  if (fade) {
+    el.classList.add(“fading”);
+    setTimeout(() => {
+      el.classList.remove(“fading”);
+      el.innerHTML = `”${esc(q.t)}”<span class=”qa”>— ${esc(q.a)}</span>`;
+      el.style.animation = “none”; void el.offsetWidth; el.style.animation = “”;
+    }, 300);
+  } else {
+    el.innerHTML = `”${esc(q.t)}”<span class=”qa”>— ${esc(q.a)}</span>`;
+    el.style.animation = “none”; void el.offsetWidth; el.style.animation = “”;
+  }
 }
 function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function ymd(d) {
@@ -1864,6 +1884,7 @@ if (configured) {
   $("btn-add-field").onclick = () => addGratField();
   $("btn-media").onclick = () => $("media-input").click();
   $("btn-save").onclick = saveEntry;
+  $("btn-next-quote").onclick = () => setDailyQuote(true);
   $("notes").addEventListener("input", saveDraftDebounced);
   const notesMic = $("notes-mic");
   notesMic.innerHTML = micSvg();
