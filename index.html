@@ -226,6 +226,8 @@
     letter-spacing: .2px; color: var(--accent-deep);
   }
   @keyframes quoteIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  @keyframes quoteOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px); } }
+  .daily-quote.fading-out { animation: quoteOut .4s ease forwards; }
   @media (prefers-reduced-motion: reduce) { .daily-quote { animation: none; opacity: 1; } }
   .hide { display: none !important; }
   .center { text-align: center; }
@@ -918,14 +920,26 @@ const QUOTES = [
   { t: "Count your life by smiles, not tears.", a: "John Lennon" },
 ];
 let lastQuoteIdx = -1;
-function setDailyQuote() {
-  const el = $("daily-quote"); if (!el) return;
+function setDailyQuote(animate = false) {
+  const el = $(“daily-quote”); if (!el) return;
   let i = Math.floor(Math.random() * QUOTES.length);
-  if (QUOTES.length > 1 && i === lastQuoteIdx) i = (i + 1) % QUOTES.length; // avoid immediate repeat
+  if (QUOTES.length > 1 && i === lastQuoteIdx) i = (i + 1) % QUOTES.length;
   lastQuoteIdx = i;
   const q = QUOTES[i];
-  el.innerHTML = `“${esc(q.t)}”<span class="qa">— ${esc(q.a)}</span>`;
-  el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; // replay fade-in on refresh
+  if (animate) {
+    el.classList.add(“fading-out”);
+    setTimeout(() => {
+      el.classList.remove(“fading-out”);
+      el.innerHTML = `”${esc(q.t)}”<span class=”qa”>— ${esc(q.a)}</span>`;
+      el.style.animation = “none”; void el.offsetWidth; el.style.animation = “”;
+    }, 400);
+  } else {
+    el.innerHTML = `”${esc(q.t)}”<span class=”qa”>— ${esc(q.a)}</span>`;
+    el.style.animation = “none”; void el.offsetWidth; el.style.animation = “”;
+  }
+}
+function startQuoteRotation() {
+  setInterval(() => setDailyQuote(true), 12000);
 }
 function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function ymd(d) {
@@ -1041,6 +1055,7 @@ function buildWriteForm() {
   $("today-date").textContent = fmtDate(new Date());
   $("greeting").textContent = greetingWord();
   setDailyQuote();
+  if (!window._quoteRotationStarted) { window._quoteRotationStarted = true; startQuoteRotation(); }
   // remove any leftover draft note
   const dn = $("draft-note"); if (dn) dn.remove();
   // gratitude fields (start with 3)
