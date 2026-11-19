@@ -425,6 +425,22 @@
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ---------- Daily reminder ---------- */
+  .bell-btn { width: 38px; height: 38px; background: transparent; color: var(--ink-soft); }
+  .bell-btn.on { background: var(--accent-soft); color: var(--accent-deep); }
+  .head-actions .btn { white-space: nowrap; }
+  @media (max-width: 440px) { .head-actions .who { display: none; } }
+  .rem-switch { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--ink); cursor: pointer; font-size: 16px; }
+  .rem-switch input { position: absolute; opacity: 0; pointer-events: none; }
+  .rem-track { width: 48px; height: 28px; border-radius: 999px; background: var(--line); position: relative; transition: background .2s; flex: 0 0 auto; }
+  .rem-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.15); transition: transform .2s; }
+  .rem-switch input:checked + .rem-track { background: var(--accent); }
+  .rem-switch input:checked + .rem-track .rem-thumb { transform: translateX(20px); }
+  .rem-switch input:focus-visible + .rem-track { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+  .rem-time-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; color: var(--ink-soft); font-weight: 600; transition: opacity .2s; }
+  .rem-time-row input { width: auto; font-size: 17px; padding: 10px 14px; font-family: inherit; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+
   /* ---------- Modal ---------- */
   .overlay {
     position: fixed; inset: 0; background: rgba(52,64,90,.35); backdrop-filter: blur(3px);
@@ -588,6 +604,7 @@
       </div>
       <div class="head-actions">
         <span class="who" id="who"></span>
+        <button class="icon-btn bell-btn" type="button" id="btn-reminder" title="Daily reminder" aria-label="Daily reminder"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
         <button class="btn subtle sm" id="btn-logout">Sign out</button>
       </div>
     </div>
@@ -1037,6 +1054,7 @@ function onLogin(user) {
   }
   calMonth = startOfMonth(new Date());
   buildWriteForm();
+  refreshReminderBell();
   loadEntryDays();
   // Clean the magic-link tokens out of the URL bar
   if (window.location.hash.includes("access_token")) {
@@ -1274,6 +1292,150 @@ function startDictation(target, micBtn) {
 
 // Stop listening if the user switches tabs or locks their phone.
 document.addEventListener("visibilitychange", () => { if (document.hidden) stopDictation(); });
+
+// ======================================================
+//  DAILY REMINDER (push notifications)
+// ======================================================
+const VAPID_PUBLIC_KEY = "BNUsiV3puiUkP6kHP1-R6dkdeC7H5kd1SRDsMQLHHZ9lIzV3DFWcCIx3nknJgQnxz0wJPPWiZy_CrEzE7vICVf8";
+const REMINDER_DEFAULT_TIME = "21:30";
+
+function b64UrlToBytes(b64) {
+  const pad = "=".repeat((4 - (b64.length % 4)) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+}
+function remindersSupported() {
+  return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+}
+function prettyTime(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return new Date(2000, 0, 1, h, m).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+async function currentPushSub() {
+  const reg = await navigator.serviceWorker.ready;
+  return reg.pushManager.getSubscription();
+}
+async function loadReminderSetting() {
+  const sub = await currentPushSub();
+  if (!sub || Notification.permission !== "granted") return { enabled: false, time: REMINDER_DEFAULT_TIME };
+  const { data } = await sb.from("push_subscriptions").select("remind_time,enabled").eq("endpoint", sub.endpoint).maybeSingle();
+  if (!data) return { enabled: false, time: REMINDER_DEFAULT_TIME };
+  return { enabled: data.enabled, time: String(data.remind_time).slice(0, 5) };
+}
+async function saveReminderOn(time) {
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") throw new Error("permission");
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64UrlToBytes(VAPID_PUBLIC_KEY) });
+  const j = sub.toJSON();
+  const { error } = await sb.from("push_subscriptions").upsert({
+    user_id: USER.id, endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth,
+    remind_time: time, enabled: true, last_sent_date: null,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+    updated_at: new Date().toISOString()
+  }, { onConflict: "endpoint" });
+  if (error) throw error;
+}
+async function saveReminderOff() {
+  const sub = await currentPushSub();
+  if (!sub) return;
+  await sb.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+  try { await sub.unsubscribe(); } catch (_) {}
+}
+
+async function openReminderPanel() {
+  const ov = document.createElement("div");
+  ov.className = "overlay"; ov.id = "reminder-overlay";
+  ov.innerHTML = `<div class="modal">
+      <h3 style="margin:0 0 6px;">Daily reminder</h3>
+      <p class="muted" style="margin:0 0 16px;line-height:1.6;">A gentle nudge — <i>"What's one good thing today? 🌿"</i> If you've already written that day, we'll stay quiet.</p>
+      <div id="rem-body"><p class="hint"><span class="spinner"></span></p></div>
+      <div class="row" style="justify-content:flex-end;gap:10px;margin-top:18px;">
+        <button class="btn ghost" id="rem-close">Close</button>
+        <button class="btn" id="rem-save" disabled>Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  ov.onclick = (e) => { if (e.target === ov) close(); };
+  $("rem-close").onclick = close;
+
+  const body = $("rem-body");
+  if (LOCAL_PREVIEW) {
+    body.innerHTML = `<p class="hint">Reminders work on your live Grateful app (the home-screen leaf), not in this local preview.</p>`;
+    return;
+  }
+  if (!remindersSupported()) {
+    body.innerHTML = `<p class="hint">This browser can't show reminders. On Android, open Grateful from your home-screen leaf icon in Chrome.</p>`;
+    return;
+  }
+  if (Notification.permission === "denied") {
+    body.innerHTML = `<p class="hint">Notifications are turned off for Grateful. To turn them on: press and hold the leaf icon → <b>App info</b> → <b>Notifications</b> → allow. Then come back here.</p>`;
+    return;
+  }
+
+  let setting = { enabled: false, time: REMINDER_DEFAULT_TIME };
+  try { setting = await loadReminderSetting(); } catch (_) {}
+  if (!document.body.contains(ov)) return;
+
+  body.innerHTML = `
+    <label class="rem-switch">
+      <input type="checkbox" id="rem-on" ${setting.enabled ? "checked" : ""}/>
+      <span class="rem-track"><span class="rem-thumb"></span></span>
+      <span>Remind me every day</span>
+    </label>
+    <label class="rem-time-row" id="rem-time-row">
+      <span>At</span>
+      <input type="time" id="rem-time" value="${setting.time}" step="300"/>
+    </label>
+    <p class="hint" id="rem-status" style="margin:12px 0 0;">${setting.enabled ? "On — every day at " + prettyTime(setting.time) + "." : "Off."}</p>
+    ${setting.enabled ? '<button class="btn subtle sm" id="rem-test" style="margin-top:10px;">Send me a test</button>' : ""}`;
+
+  const on = $("rem-on"), timeRow = $("rem-time-row"), saveBtn = $("rem-save");
+  const sync = () => { timeRow.style.opacity = on.checked ? "1" : ".45"; $("rem-time").disabled = !on.checked; };
+  sync(); saveBtn.disabled = false;
+  on.onchange = sync;
+
+  if ($("rem-test")) $("rem-test").onclick = async () => {
+    const b = $("rem-test"); b.disabled = true; b.textContent = "Sending…";
+    try {
+      const { data, error } = await sb.functions.invoke("send-reminders", { body: { test: true } });
+      if (error) throw error;
+      toast(data && data.sent ? "Test sent — check your notifications 🌿" : "Couldn't reach this phone. Try turning the reminder off and on.");
+    } catch (_) { toast("Couldn't send a test right now."); }
+    b.disabled = false; b.textContent = "Send me a test";
+  };
+
+  saveBtn.onclick = async () => {
+    saveBtn.disabled = true; saveBtn.textContent = "Saving…";
+    const time = $("rem-time").value || REMINDER_DEFAULT_TIME;
+    try {
+      if (on.checked) {
+        await saveReminderOn(time);
+        toast("Reminder set for " + prettyTime(time) + " each day 🌿");
+      } else {
+        await saveReminderOff();
+        toast("Daily reminder turned off.");
+      }
+      updateReminderBell(on.checked);
+      close();
+    } catch (e) {
+      saveBtn.disabled = false; saveBtn.textContent = "Save";
+      if (e && e.message === "permission") toast("Please allow notifications so Grateful can remind you.");
+      else toast("Couldn't save your reminder. Please try again.");
+    }
+  };
+}
+
+function updateReminderBell(isOn) {
+  const b = $("btn-reminder");
+  if (b) b.classList.toggle("on", !!isOn);
+}
+async function refreshReminderBell() {
+  if (LOCAL_PREVIEW || !remindersSupported() || !USER) return;
+  try { updateReminderBell((await loadReminderSetting()).enabled); } catch (_) {}
+}
 
 // ---------- Media picking ----------
 $("media-input") && ($("media-input").onchange = (e) => {
@@ -2009,6 +2171,7 @@ if (configured) {
   } else {
     $("btn-logout").onclick = async () => { saveDraft(); await sb.auth.signOut(); };
   }
+  $("btn-reminder").onclick = openReminderPanel;
   $("btn-add-field").onclick = () => addGratField();
   $("btn-media").onclick = () => $("media-input").click();
   $("btn-save").onclick = saveEntry;
