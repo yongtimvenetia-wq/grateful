@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<meta name="theme-color" content="#f7f9fc" />
+<meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#141a26" media="(prefers-color-scheme: dark)" />
+<meta name="color-scheme" content="light dark" />
 <!-- Home-screen app (Add to Home screen / Install app) -->
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
@@ -126,7 +128,7 @@
   .grat-row textarea.listening { border-color: #e6b8b8; background: #fff7f7; }
 
   /* mood chips */
-  .moods { display: flex; flex-wrap: wrap; gap: 8px; }
+  .moods { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
   .mood {
     position: relative; overflow: visible;
     padding: 9px 15px; border-radius: 999px; background: var(--bg-soft); color: var(--ink-soft);
@@ -476,6 +478,75 @@
     h1.big { font-size: 26px; }
     .card { padding: 18px; }
     .who { max-width: 90px; }
+  }
+
+  /* ============================================================
+     DARK MODE — switches on automatically when the phone/computer
+     is set to dark mode. Calm night-blue palette, same layout.
+     ============================================================ */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #141a26;
+      --bg-soft: #1e2636;
+      --card: #1a2231;
+      --ink: #e3e8f3;
+      --ink-soft: #a9b3c9;
+      --ink-faint: #76819a;
+      --accent: #7f9ad3;
+      --accent-deep: #a9bff0;
+      --accent-soft: #263352;
+      --lav: #3b4770;
+      --line: #2a3346;
+      --danger: #e09a9a;
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    body {
+      background:
+        radial-gradient(1200px 600px at 80% -10%, #1c2640 0%, rgba(28,38,64,0) 60%),
+        radial-gradient(900px 500px at -10% 10%, #221d38 0%, rgba(34,29,56,0) 55%),
+        var(--bg);
+    }
+    header.app { background: rgba(20, 26, 38, 0.82); }
+    nav.tabs { background: rgba(22, 29, 42, 0.92); }
+    .btn { color: #0f1522; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+    .btn.ghost, .btn.subtle, .btn.danger { color: var(--accent-deep); }
+    .btn.subtle { color: var(--ink-soft); }
+    .btn.danger { color: var(--danger); }
+    .btn.ghost:hover, .icon-btn:hover { background: #2f3d60; }
+    .btn.danger:hover { background: #3a2529; }
+    .chip.on, .cal-cell.sel { color: #0f1522; }
+    .cal-cell.sel::after { background: #0f1522; }
+    input:focus, textarea:focus, select:focus { background: #222b3d; }
+    .grat-row textarea.listening { border-color: #7a4a4a; background: #2a1f24; }
+    .icon-btn.rec { background: #3a2529; color: #e39a9a; }
+    .car-arrow { background: var(--card); }
+    .draft-note { background: #2c2618; color: #e2c486; border-color: #4a3f24; }
+    .draft-note button { color: #e2c486; }
+    #preview-banner { background: #1d2740 !important; color: #a9b8dd !important; }
+    .tl-stat { background: linear-gradient(135deg, #222d48 0%, #2a2442 100%); }
+    .memory { background: linear-gradient(160deg, #1e2738 0%, #1a2131 100%); }
+    .modal { background: var(--card); color: var(--ink); }
+    .overlay { background: rgba(5, 8, 15, 0.6); }
+    #toast { background: #e3e8f3; color: #141a26; }
+    .breathe-card { background: linear-gradient(160deg, #1d2a42 0%, #1f2340 55%, #261f3d 100%); border-color: var(--lav); }
+    .breathe-controls .btn { color: #0f1522; }
+    .breathe-controls .btn.ghost { background: rgba(255,255,255,.08); color: var(--accent-deep); border-color: rgba(169,191,240,.25); }
+    .breathe-controls .btn.ghost:hover { background: rgba(255,255,255,.14); }
+    /* mood colors: slightly brighter so they pop on dark */
+    .m-appreciated { color: #7cc27c; }
+    .m-loved       { color: #ec8fb1; }
+    .m-good        { color: #efbb63; }
+    .m-okay        { color: #8fb0ec; }
+    .m-overwhelmed { color: #62c0ce; }
+    .m-sad         { color: #9ea8e2; }
+    .mood[data-mood="Appreciated"].on, .mf[data-mood="Appreciated"].on { background:#1f3324; border-color:#3f6e44; color:#9fd69f; }
+    .mood[data-mood="Loved"].on,       .mf[data-mood="Loved"].on       { background:#3a2230; border-color:#7a4560; color:#f2a9c4; }
+    .mood[data-mood="Good"].on,        .mf[data-mood="Good"].on        { background:#3a2f1c; border-color:#7a6235; color:#f2c97e; }
+    .mood[data-mood="Okay"].on,        .mf[data-mood="Okay"].on        { background:#1f2a44; border-color:#43598a; color:#a9c2f2; }
+    .mood[data-mood="Overwhelmed"].on, .mf[data-mood="Overwhelmed"].on { background:#1a3236; border-color:#3a6f78; color:#8fd6e0; }
+    .mood[data-mood="Sad"].on,         .mf[data-mood="Sad"].on         { background:#24273f; border-color:#4b5185; color:#b8bfec; }
   }
 </style>
 </head>
