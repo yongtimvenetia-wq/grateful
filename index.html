@@ -1090,42 +1090,113 @@ function micSvg() {
 }
 
 // ---------- Voice to text (Web Speech API) ----------
-let recognizer = null;
+// Keeps listening through natural pauses. Browsers end a speech session after
+// a short silence, so we quietly start a new one until the user taps the mic
+// again (or after a long stretch with no speech).
+let dictation = null;
+const DICTATION_IDLE_MS = 30000;               // auto-stop after 30s of silence
+const DICTATION_IS_ANDROID = /Android/i.test(navigator.userAgent);
+
+function joinWords(a, b) { return a && b ? a + " " + b : (a || b || ""); }
+
+function stopDictation(msg) {
+  const d = dictation;
+  if (!d) return;
+  dictation = null;
+  d.stopped = true;
+  clearTimeout(d.idleTimer);
+  try { d.rec && d.rec.stop(); } catch (_) {}
+  d.btn.classList.remove("rec");
+  d.target.classList.remove("listening");
+  if (d.target._ph !== undefined) d.target.placeholder = d.target._ph;
+  if (msg) toast(msg);
+}
+
 function startDictation(target, micBtn) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { toast("Voice typing isn't supported in this browser. Try Chrome or Safari."); return; }
-  if (recognizer) { recognizer.stop(); recognizer = null; micBtn.classList.remove("rec"); target.classList.remove("listening"); return; }
-  recognizer = new SR();
-  recognizer.lang = navigator.language || "en-US";
-  recognizer.interimResults = true;
-  recognizer.continuous = false;
-  const base = target.value ? target.value.trim() + " " : "";
+  // Tapping the mic again stops. Tapping another field's mic switches to it.
+  if (dictation) {
+    const same = dictation.target === target;
+    stopDictation();
+    if (same) return;
+  }
+  const d = {
+    target, btn: micBtn, rec: null, stopped: false, idleTimer: null,
+    base: target.value ? target.value.trim() : "",  // text kept from earlier sessions
+    sessionText: "",                                 // text heard in the current session
+    quickFails: 0
+  };
+  dictation = d;
   micBtn.classList.add("rec");
-  // clearer recording state (NEW)
   target.classList.add("listening");
   target._ph = target.placeholder;
-  target.placeholder = "Listening… speak now";
-  toast("Listening… speak now 🎙️");
-  recognizer.onresult = (e) => {
-    let txt = "";
-    for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
-    target.value = base + txt;
-    saveDraftDebounced();
+  target.placeholder = "Listening… take your time. Tap the mic to stop.";
+  toast("Listening… tap the mic again when you're done 🎙️");
+
+  const resetIdle = () => {
+    clearTimeout(d.idleTimer);
+    d.idleTimer = setTimeout(() => {
+      if (dictation === d) stopDictation("Stopped listening. Tap the mic to keep going.");
+    }, DICTATION_IDLE_MS);
   };
-  recognizer.onerror = (ev) => {
-    if (ev && (ev.error === "not-allowed" || ev.error === "service-not-allowed")) {
-      toast("Microphone access is blocked. Allow it in your browser to use voice.");
-    } else {
-      toast("Couldn't hear that — try again.");
-    }
+
+  const begin = () => {
+    const rec = new SR();
+    d.rec = rec;
+    d.sessionText = "";
+    rec.lang = navigator.language || "en-US";
+    rec.interimResults = true;
+    // Android Chrome repeats words in continuous mode, so there we rely on auto-restart.
+    rec.continuous = !DICTATION_IS_ANDROID;
+    const startedAt = Date.now();
+    let heardSomething = false;
+
+    rec.onresult = (e) => {
+      if (d.rec !== rec) return;
+      let finals = "", interim = "";
+      for (let i = 0; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript.trim();
+        if (e.results[i].isFinal) finals = joinWords(finals, t); else interim = joinWords(interim, t);
+      }
+      d.sessionText = joinWords(finals, interim);
+      target.value = joinWords(d.base, d.sessionText);
+      saveDraftDebounced();
+      heardSomething = true;
+      d.quickFails = 0;
+      if (!d.stopped) resetIdle();
+    };
+
+    rec.onerror = (ev) => {
+      const err = ev && ev.error;
+      if (err === "not-allowed" || err === "service-not-allowed" || err === "audio-capture") {
+        stopDictation("Microphone access is blocked. Allow it in your browser to use voice.");
+      } else if (err === "network") {
+        stopDictation("Voice typing needs an internet connection.");
+      }
+      // "no-speech" and "aborted" are just pauses — onend restarts listening.
+    };
+
+    rec.onend = () => {
+      if (d.rec !== rec) return;
+      d.base = joinWords(d.base, d.sessionText);   // keep everything heard so far
+      d.sessionText = "";
+      if (d.stopped || dictation !== d) return;
+      // Guard against a browser that keeps ending instantly.
+      if (!heardSomething && Date.now() - startedAt < 1000) d.quickFails++;
+      if (d.quickFails >= 3) { stopDictation("Couldn't keep the microphone on — tap the mic to try again."); return; }
+      setTimeout(() => { if (dictation === d && !d.stopped) begin(); }, 200);
+    };
+
+    try { rec.start(); } catch (_) { stopDictation("Couldn't start the microphone — try again."); }
   };
-  recognizer.onend = () => {
-    micBtn.classList.remove("rec"); recognizer = null;
-    target.classList.remove("listening");
-    if (target._ph !== undefined) target.placeholder = target._ph;
-  };
-  recognizer.start();
+
+  resetIdle();
+  begin();
 }
+
+// Stop listening if the user switches tabs or locks their phone.
+document.addEventListener("visibilitychange", () => { if (document.hidden) stopDictation(); });
 
 // ---------- Media picking ----------
 $("media-input") && ($("media-input").onchange = (e) => {
